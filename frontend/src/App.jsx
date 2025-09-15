@@ -1,19 +1,18 @@
-import React from 'react';
-import TrainControlViewer from './components/TrainControlViewer';
-import TrainControlOperator from './components/TrainControlOperator';
+import './App.css'
+import TrainControlViewer from './components/TrainControlViewer.jsx'
+import TrainControlOperator from './components/TrainControlOperator.jsx'
+
 
 function App() {
-  const path = window.location.pathname;
+  
 
   return (
     <>
-      {path.includes('/operator') ? (
-        <TrainControlOperator />
-      ) : (
-        <TrainControlViewer />
-      )}
+     <TrainControlViewer />
+     {/* <p>alag</p> */}
+     <TrainControlOperator />
     </>
-  );
+  )
 }
 
-export default App;
+export default App
