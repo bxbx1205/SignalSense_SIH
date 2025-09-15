@@ -6,12 +6,12 @@ import RailwayStationSimulation from './RailwayStationSimulation';
 // --- ENRICHED DATA with SIGNALS, POINTS, and ROUTES ---
 const initialRailwayData = {
     stations: [
-        { code: "WR", name: "Wardha Jn", km: 0.0, platformCount: 4 },
-        { code: "SEGM", name: "Sewagram", km: 2.6, platformCount: 2 },
-        { code: "BTBR", name: "Butibori", km: 51.3, platformCount: 3 },
-        { code: "AJNI", name: "Ajni", km: 75.9, platformCount: 3 },
-        { code: "NGP", name: "Nagpur Jn", km: 78.8, platformCount: 8 },
-        { code: "G", name: "Gondia Jn", km: 208.4, platformCount: 7 }
+        { code: "WR", name: "Wardha Jn", km: 0.0, platformCount: 2, trackLines: 2 },
+        { code: "SEGM", name: "Sewagram", km: 2.6, platformCount: 2, trackLines: 2 },
+        { code: "BTBR", name: "Butibori", km: 51.3, platformCount: 2, trackLines: 2 },
+        { code: "AJNI", name: "Ajni", km: 75.9, platformCount: 4, trackLines: 4 },
+        { code: "NGP", name: "Nagpur Jn", km: 78.8, platformCount: 8, trackLines: 6 },
+        { code: "G", name: "Gondia Jn", km: 208.4, platformCount: 2, trackLines: 2 }
     ],
     active_trains: [
         { id: "12859", name: "Gitanjali Express", position: { section: "BTBR-AJNI", km_from_WR: 70.1 }, speed: 88, status: "RUNNING", scheduled_arrival: "2025-09-15T18:15:00Z", delayed_by_min: 5, direction: "UP" },
@@ -20,33 +20,97 @@ const initialRailwayData = {
         { id: "22691", name: "Rajdhani Express", position: { station: "NGP", platform: "P2" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:08:00Z", delayed_by_min: 8, direction: "DOWN" },
         { id: "12289", name: "CSMT NGP Duronto", position: { section: "AJNI-NGP", km_from_WR: 78.1 }, speed: 25, status: "APPROACHING", scheduled_arrival: "2025-09-15T18:14:00Z", delayed_by_min: 2, direction: "UP" },
         { id: "12649", name: "Sampark Kranti", position: { station: "NGP", platform: "P6" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:20:00Z", delayed_by_min: 28, direction: "DOWN" },
+        { id: "16032", name: "Andaman Express", position: { station: "WR", platform: "P1" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:30:00Z", delayed_by_min: 0, direction: "UP" },
+        { id: "12860", name: "Gitanjali Express", position: { station: "SEGM", platform: "P1" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:15:00Z", delayed_by_min: 10, direction: "DOWN" },
+        { id: "12724", name: "Telangana Express", position: { station: "BTBR", platform: "P2" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:40:00Z", delayed_by_min: 5, direction: "UP" },
+        { id: "12442", name: "Rajdhani Express", position: { section: "AJNI-NGP", km_from_WR: 77.5 }, speed: 35, status: "APPROACHING", scheduled_arrival: "2025-09-15T18:25:00Z", delayed_by_min: 0, direction: "DOWN" },
+        { id: "12619", name: "Matsyagandha Exp", position: { station: "AJNI", platform: "P1" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:12:00Z", delayed_by_min: 15, direction: "UP" },
+        { id: "18030", name: "Shalimar Express", position: { station: "G", platform: "P2" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:05:00Z", delayed_by_min: 20, direction: "DOWN" },
     ],
     points: [
+        // NGP Points
         { id: "P101A", position: "NORMAL", locked: true, status: "WORKING", coords: { x: 350, y: 115 } },
         { id: "P101B", position: "REVERSE", locked: true, status: "WORKING", coords: { x: 350, y: 205 } },
         { id: "P102A", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 1050, y: 165 } },
         { id: "P102B", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 1050, y: 205 } },
         { id: "P103", position: "REVERSE", locked: false, status: "MAINTENANCE", coords: { x: 370, y: 305 } },
-        { id: "P104", position: "NORMAL", locked: true, status: "WORKING", coords: { x: 370, y: 450 } }
+        { id: "P104", position: "NORMAL", locked: true, status: "WORKING", coords: { x: 370, y: 450 } },
+        
+        // WR Points (2 track lines)
+        { id: "WR101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 175 } },
+        { id: "WR102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 175 } },
+        
+        // SEGM Points (2 track lines)
+        { id: "SEGM101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 175 } },
+        { id: "SEGM102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 175 } },
+        
+        // BTBR Points (2 track lines)
+        { id: "BTBR101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 175 } },
+        { id: "BTBR102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 175 } },
+        
+        // AJNI Points (4 track lines)
+        { id: "AJNI101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 150 } },
+        { id: "AJNI102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 200 } },
+        { id: "AJNI103", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 150 } },
+        { id: "AJNI104", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 200 } },
+        
+        // G Points (2 track lines)
+        { id: "G101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 175 } },
+        { id: "G102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 175 } },
     ],
     signals: [
+        // NGP Signals
         { id: "H1", type: "HOME", status: "YELLOW", coords: { x: 280, y: 115 }, route: "AJNI-NGP" },
         { id: "S1", type: "STARTER", status: "RED", coords: { x: 810, y: 180 }, route: "P1-OUT" },
         { id: "S2", type: "STARTER", status: "RED", coords: { x: 810, y: 230 }, route: "P2-OUT" },
         { id: "S3", type: "STARTER", status: "GREEN", coords: { x: 810, y: 280 }, route: "P3-OUT" },
         { id: "S4", type: "STARTER", status: "RED", coords: { x: 810, y: 330 }, route: "P4-OUT" },
         { id: "S8", type: "STARTER", status: "YELLOW", coords: { x: 810, y: 450 }, route: "P8-OUT" },
-        { id: "H2", type: "HOME", status: "RED", coords: { x: 1100, y: 115 }, route: "GONDIA-NGP" }
+        { id: "H2", type: "HOME", status: "RED", coords: { x: 1100, y: 115 }, route: "GONDIA-NGP" },
+        
+        // WR Signals
+        { id: "WR_H1", type: "HOME", status: "GREEN", coords: { x: 250, y: 150 }, route: "ENTRY-WR" },
+        { id: "WR_H2", type: "HOME", status: "RED", coords: { x: 250, y: 200 }, route: "ENTRY-WR" },
+        { id: "WR_S1", type: "STARTER", status: "YELLOW", coords: { x: 850, y: 150 }, route: "EXIT-WR" },
+        { id: "WR_S2", type: "STARTER", status: "GREEN", coords: { x: 850, y: 200 }, route: "EXIT-WR" },
+        
+        // SEGM Signals
+        { id: "SEGM_H1", type: "HOME", status: "RED", coords: { x: 250, y: 150 }, route: "ENTRY-SEGM" },
+        { id: "SEGM_H2", type: "HOME", status: "YELLOW", coords: { x: 250, y: 200 }, route: "ENTRY-SEGM" },
+        { id: "SEGM_S1", type: "STARTER", status: "GREEN", coords: { x: 850, y: 150 }, route: "EXIT-SEGM" },
+        { id: "SEGM_S2", type: "STARTER", status: "RED", coords: { x: 850, y: 200 }, route: "EXIT-SEGM" },
+        
+        // BTBR Signals
+        { id: "BTBR_H1", type: "HOME", status: "YELLOW", coords: { x: 250, y: 150 }, route: "ENTRY-BTBR" },
+        { id: "BTBR_H2", type: "HOME", status: "GREEN", coords: { x: 250, y: 200 }, route: "ENTRY-BTBR" },
+        { id: "BTBR_S1", type: "STARTER", status: "RED", coords: { x: 850, y: 150 }, route: "EXIT-BTBR" },
+        { id: "BTBR_S2", type: "STARTER", status: "YELLOW", coords: { x: 850, y: 200 }, route: "EXIT-BTBR" },
+        
+        // AJNI Signals (4 lines)
+        { id: "AJNI_H1", type: "HOME", status: "GREEN", coords: { x: 250, y: 130 }, route: "ENTRY-AJNI" },
+        { id: "AJNI_H2", type: "HOME", status: "RED", coords: { x: 250, y: 180 }, route: "ENTRY-AJNI" },
+        { id: "AJNI_H3", type: "HOME", status: "YELLOW", coords: { x: 250, y: 230 }, route: "ENTRY-AJNI" },
+        { id: "AJNI_H4", type: "HOME", status: "GREEN", coords: { x: 250, y: 280 }, route: "ENTRY-AJNI" },
+        { id: "AJNI_S1", type: "STARTER", status: "RED", coords: { x: 850, y: 130 }, route: "EXIT-AJNI" },
+        { id: "AJNI_S2", type: "STARTER", status: "YELLOW", coords: { x: 850, y: 180 }, route: "EXIT-AJNI" },
+        { id: "AJNI_S3", type: "STARTER", status: "GREEN", coords: { x: 850, y: 230 }, route: "EXIT-AJNI" },
+        { id: "AJNI_S4", type: "STARTER", status: "RED", coords: { x: 850, y: 280 }, route: "EXIT-AJNI" },
+        
+        // G Signals
+        { id: "G_H1", type: "HOME", status: "RED", coords: { x: 250, y: 150 }, route: "ENTRY-G" },
+        { id: "G_H2", type: "HOME", status: "GREEN", coords: { x: 250, y: 200 }, route: "ENTRY-G" },
+        { id: "G_S1", type: "STARTER", status: "YELLOW", coords: { x: 850, y: 150 }, route: "EXIT-G" },
+        { id: "G_S2", type: "STARTER", status: "RED", coords: { x: 850, y: 200 }, route: "EXIT-G" },
     ],
     routes: [
         { id: "R1", from: "AJNI", to: "NGP-P1", status: "AVAILABLE", path: "H1-P101A-S1" },
         { id: "R2", from: "AJNI", to: "NGP-P2", status: "LOCKED", path: "H1-P101B-S2" },
         { id: "R3", from: "NGP-P1", to: "GONDIA", status: "AVAILABLE", path: "S1-P102A-H2" },
-        { id: "R4", from: "NGP-P8", to: "GONDIA", status: "SET", path: "S8-P104-H2" }
+        { id: "R4", from: "NGP-P8", to: "GONDIA", status: "SET", path: "S8-P104-H2" },
     ],
     interlocks: [
         { points: ["P101A", "P101B"], signals: ["H1"], condition: "MUTUALLY_EXCLUSIVE" },
-        { points: ["P102A", "P102B"], signals: ["S1", "S2"], condition: "DEPENDENT" }
+        { points: ["P102A", "P102B"], signals: ["S1", "S2"], condition: "DEPENDENT" },
     ]
 };
 
@@ -71,7 +135,7 @@ const getSignalColor = (status) => {
     return "#ef4444";
 };
 
-// --- SVG Sub-Components ---
+// --- TRACK COMPONENTS ---
 const PointSwitch = ({ point, onToggle }) => {
     const { x, y } = point.coords;
     const isReverse = point.position === 'REVERSE';
@@ -141,6 +205,285 @@ const TrainIndicator = ({ train, position, isMoving }) => {
     );
 };
 
+// --- STATION LAYOUTS ---
+
+// Layout for stations with 2 track lines (WR, SEGM, BTBR, G)
+const TwoTrackStationLayout = ({ stationName, stationCode, activeTrains, points, signals, onPointToggle, onSignalToggle, trackOccupancy = {} }) => {
+    const getTrainPosition = (train) => {
+        if (train.position.platform) {
+            return { x: 600, y: train.position.platform === "P1" ? 150 : 200 };
+        } else if (train.position.section && train.position.section.includes(stationCode)) {
+            return { x: 300, y: 150 };
+        }
+        return null;
+    };
+
+    const stationSignals = signals.filter(s => s.id.startsWith(stationCode));
+    const stationPoints = points.filter(p => p.id.startsWith(stationCode));
+
+    return (
+        <div className="relative bg-[#0A1A30] w-full h-[580px] p-2 overflow-hidden rounded-lg border-2 border-[#073f7c]">
+            <div className="absolute top-0 left-0 w-full flex justify-center">
+                <div className="bg-[#073f7c] text-center py-2 px-4 rounded-b-lg">
+                    <h2 className="text-lg font-bold text-[#FFA500]">{stationName} ({stationCode}) - 2 TRACK STATION</h2>
+                </div>
+            </div>
+            
+            <div className="flex justify-between mt-12 mx-6 mb-2">
+                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">INCOMING</div>
+                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">CENTRAL TRAIN CONTROL</div>
+                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">OUTGOING</div>
+            </div>
+            
+            <svg width="100%" height="90%" viewBox="0 0 1200 400">
+                {/* Base tracks - 2 main lines */}
+                <g className="tracks" stroke="#00BFFF" strokeWidth="4" fill="none">
+                    <path d="M0 150 H1200" />
+                    <path d="M0 200 H1200" />
+                    
+                    {/* Platform indicators */}
+                    <rect x="450" y="140" width="300" height="20" rx="2" fill="#10693b" opacity="0.6" />
+                    <rect x="450" y="190" width="300" height="20" rx="2" fill="#10693b" opacity="0.6" />
+                    
+                    {/* Station building */}
+                    <rect x="500" y="100" width="200" height="140" rx="5" stroke="#FFA500" strokeWidth="2" strokeDasharray="5,5" fill="rgba(255, 165, 0, 0.1)" />
+                    <text x="600" y="90" fill="#FFA500" fontSize="16" textAnchor="middle" fontWeight="bold">STATION BUILDING</text>
+                    
+                    {/* Track numbers */}
+                    <text x="50" y="145" fill="#FFF" fontSize="14" fontWeight="bold">TRACK 1</text>
+                    <text x="50" y="195" fill="#FFF" fontSize="14" fontWeight="bold">TRACK 2</text>
+                </g>
+                
+                {/* Signals */}
+                {stationSignals.map(signal => (
+                    <SignalPost key={signal.id} signal={signal} onToggle={onSignalToggle} />
+                ))}
+                
+                {/* Points */}
+                {stationPoints.map(point => (
+                    <PointSwitch key={point.id} point={point} onToggle={onPointToggle} />
+                ))}
+                
+                {/* Train indicators */}
+                {activeTrains
+                    .filter(train => 
+                        train.position.station === stationCode || 
+                        (train.position.section && train.position.section.includes(stationCode))
+                    )
+                    .map(train => {
+                        const pos = getTrainPosition(train);
+                        if (pos) {
+                            return <TrainIndicator key={train.id} train={train} position={pos} isMoving={train.speed > 0} />;
+                        }
+                        return null;
+                    })
+                }
+                
+                {/* Platform labels */}
+                <text x="600" y="135" fontSize="14" fill="white" textAnchor="middle" fontWeight="bold">PLATFORM 1</text>
+                <text x="600" y="185" fontSize="14" fill="white" textAnchor="middle" fontWeight="bold">PLATFORM 2</text>
+                
+                {/* Grid lines for reference */}
+                <g stroke="#1a365d" strokeWidth="1" opacity="0.3">
+                    {[...Array(12)].map((_, i) => (
+                        <line key={`vl-${i}`} x1={i*100} y1="0" x2={i*100} y2="400" />
+                    ))}
+                    {[...Array(4)].map((_, i) => (
+                        <line key={`hl-${i}`} x1="0" y1={i*100 + 50} x2="1200" y2={i*100 + 50} />
+                    ))}
+                </g>
+                
+                {/* Signal status indicators */}
+                <g transform="translate(950, 50)">
+                    <rect x="0" y="0" width="200" height="120" rx="5" fill="rgba(0, 0, 0, 0.7)" stroke="#FFA500" strokeWidth="1" />
+                    <text x="100" y="20" fill="#FFA500" fontSize="12" textAnchor="middle" fontWeight="bold">SIGNAL STATUS</text>
+                    {stationSignals.slice(0, 4).map((signal, idx) => (
+                        <g key={signal.id} transform={`translate(10, ${30 + idx * 20})`}>
+                            <circle cx="10" cy="10" r="4" fill={getSignalColor(signal.status)} />
+                            <text x="20" y="14" fill="white" fontSize="10">{signal.id}: {signal.status}</text>
+                        </g>
+                    ))}
+                </g>
+            </svg>
+            
+            {/* Track Occupancy Info */}
+            <div className="absolute top-2 right-2 bg-gray-800 px-3 py-2 rounded shadow text-xs">
+                <div className="font-bold text-yellow-400 mb-1">Track Occupancy</div>
+                <div className="space-y-1">
+                    <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Track 1</span>
+                        <span className={`px-2 py-1 rounded text-xs ${trackOccupancy[`${stationCode}-T1`] ? 'bg-red-700 text-white' : 'bg-green-700 text-white'}`}>
+                            {trackOccupancy[`${stationCode}-T1`] ? 'OCCUPIED' : 'CLEAR'}
+                        </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Track 2</span>
+                        <span className={`px-2 py-1 rounded text-xs ${trackOccupancy[`${stationCode}-T2`] ? 'bg-red-700 text-white' : 'bg-green-700 text-white'}`}>
+                            {trackOccupancy[`${stationCode}-T2`] ? 'OCCUPIED' : 'CLEAR'}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            {/* Station info panel */}
+            <div className="absolute bottom-2 left-2 bg-gray-800 px-3 py-2 rounded shadow text-xs">
+                <div className="font-bold text-yellow-400 mb-1">Station Info</div>
+                <div className="text-gray-300">
+                    <div>Code: {stationCode}</div>
+                    <div>Platforms: 2</div>
+                    <div>Track Lines: 2</div>
+                    <div>Status: Operational</div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Layout for Ajni station with 4 track lines
+const AjniStationLayout = ({ activeTrains, points, signals, onPointToggle, onSignalToggle, trackOccupancy = {} }) => {
+    const getTrainPosition = (train) => {
+        if (train.position.platform) {
+            const platformMap = { "P1": 130, "P2": 180, "P3": 230, "P4": 280 };
+            return { x: 600, y: platformMap[train.position.platform] || 130 };
+        } else if (train.position.section && train.position.section.includes("AJNI")) {
+            return { x: 300, y: 150 };
+        }
+        return null;
+    };
+
+    const ajniSignals = signals.filter(s => s.id.startsWith('AJNI'));
+    const ajniPoints = points.filter(p => p.id.startsWith('AJNI'));
+
+    return (
+        <div className="relative bg-[#0A1A30] w-full h-[580px] p-2 overflow-hidden rounded-lg border-2 border-[#073f7c]">
+            <div className="absolute top-0 left-0 w-full flex justify-center">
+                <div className="bg-[#073f7c] text-center py-2 px-4 rounded-b-lg">
+                    <h2 className="text-lg font-bold text-[#FFA500]">AJNI JUNCTION - 4 TRACK STATION</h2>
+                </div>
+            </div>
+            
+            <div className="flex justify-between mt-12 mx-6 mb-2">
+                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">FROM BTBR</div>
+                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">AJNI CONTROL ROOM</div>
+                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">TO NGP</div>
+            </div>
+            
+            <svg width="100%" height="90%" viewBox="0 0 1200 450">
+                {/* Base tracks - 4 main lines for Ajni */}
+                <g className="tracks" stroke="#00BFFF" strokeWidth="4" fill="none">
+                    <path d="M0 130 H1200" />
+                    <path d="M0 180 H1200" />
+                    <path d="M0 230 H1200" />
+                    <path d="M0 280 H1200" />
+                    
+                    {/* Platform indicators */}
+                    <rect x="450" y="120" width="300" height="20" rx="2" fill="#10693b" opacity="0.6" />
+                    <rect x="450" y="170" width="300" height="20" rx="2" fill="#10693b" opacity="0.6" />
+                    <rect x="450" y="220" width="300" height="20" rx="2" fill="#10693b" opacity="0.6" />
+                    <rect x="450" y="270" width="300" height="20" rx="2" fill="#10693b" opacity="0.6" />
+                    
+                    {/* Station building */}
+                    <rect x="500" y="80" width="200" height="240" rx="5" stroke="#FFA500" strokeWidth="2" strokeDasharray="5,5" fill="rgba(255, 165, 0, 0.1)" />
+                    <text x="600" y="70" fill="#FFA500" fontSize="16" textAnchor="middle" fontWeight="bold">AJNI STATION BUILDING</text>
+                    
+                    {/* Track numbers */}
+                    <text x="50" y="125" fill="#FFF" fontSize="14" fontWeight="bold">TRACK 1</text>
+                    <text x="50" y="175" fill="#FFF" fontSize="14" fontWeight="bold">TRACK 2</text>
+                    <text x="50" y="225" fill="#FFF" fontSize="14" fontWeight="bold">TRACK 3</text>
+                    <text x="50" y="275" fill="#FFF" fontSize="14" fontWeight="bold">TRACK 4</text>
+                    
+                    {/* Junction connections */}
+                    <path d="M 200 130 L 250 180" stroke="#00BFFF" strokeWidth="3" fill="none" strokeDasharray="3,3" />
+                    <path d="M 200 230 L 250 180" stroke="#00BFFF" strokeWidth="3" fill="none" strokeDasharray="3,3" />
+                    <path d="M 950 180 L 1000 130" stroke="#00BFFF" strokeWidth="3" fill="none" strokeDasharray="3,3" />
+                    <path d="M 950 180 L 1000 230" stroke="#00BFFF" strokeWidth="3" fill="none" strokeDasharray="3,3" />
+                </g>
+                
+                {/* Signals */}
+                {ajniSignals.map(signal => (
+                    <SignalPost key={signal.id} signal={signal} onToggle={onSignalToggle} />
+                ))}
+                
+                {/* Points */}
+                {ajniPoints.map(point => (
+                    <PointSwitch key={point.id} point={point} onToggle={onPointToggle} />
+                ))}
+                
+                {/* Train indicators */}
+                {activeTrains
+                    .filter(train => 
+                        train.position.station === "AJNI" || 
+                        (train.position.section && train.position.section.includes("AJNI"))
+                    )
+                    .map(train => {
+                        const pos = getTrainPosition(train);
+                        if (pos) {
+                            return <TrainIndicator key={train.id} train={train} position={pos} isMoving={train.speed > 0} />;
+                        }
+                        return null;
+                    })
+                }
+                
+                {/* Platform labels */}
+                <text x="600" y="115" fontSize="14" fill="white" textAnchor="middle" fontWeight="bold">PLATFORM 1</text>
+                <text x="600" y="165" fontSize="14" fill="white" textAnchor="middle" fontWeight="bold">PLATFORM 2</text>
+                <text x="600" y="215" fontSize="14" fill="white" textAnchor="middle" fontWeight="bold">PLATFORM 3</text>
+                <text x="600" y="265" fontSize="14" fill="white" textAnchor="middle" fontWeight="bold">PLATFORM 4</text>
+                
+                {/* Grid lines for reference */}
+                <g stroke="#1a365d" strokeWidth="1" opacity="0.3">
+                    {[...Array(12)].map((_, i) => (
+                        <line key={`vl-${i}`} x1={i*100} y1="0" x2={i*100} y2="450" />
+                    ))}
+                    {[...Array(5)].map((_, i) => (
+                        <line key={`hl-${i}`} x1="0" y1={i*100 + 50} x2="1200" y2={i*100 + 50} />
+                    ))}
+                </g>
+                
+                {/* Signal status indicators */}
+                <g transform="translate(950, 50)">
+                    <rect x="0" y="0" width="200" height="180" rx="5" fill="rgba(0, 0, 0, 0.7)" stroke="#FFA500" strokeWidth="1" />
+                    <text x="100" y="20" fill="#FFA500" fontSize="12" textAnchor="middle" fontWeight="bold">SIGNAL STATUS</text>
+                    {ajniSignals.slice(0, 8).map((signal, idx) => (
+                        <g key={signal.id} transform={`translate(10, ${30 + idx * 18})`}>
+                            <circle cx="8" cy="8" r="3" fill={getSignalColor(signal.status)} />
+                            <text x="18" y="12" fill="white" fontSize="9">{signal.id}: {signal.status}</text>
+                        </g>
+                    ))}
+                </g>
+            </svg>
+            
+            {/* Track Occupancy Info */}
+            <div className="absolute top-2 right-2 bg-gray-800 px-3 py-2 rounded shadow text-xs">
+                <div className="font-bold text-yellow-400 mb-1">Track Occupancy</div>
+                <div className="space-y-1">
+                    {[1,2,3,4].map(track => (
+                        <div key={track} className="flex justify-between items-center">
+                            <span className="text-gray-300">Track {track}</span>
+                            <span className={`px-2 py-1 rounded text-xs ${trackOccupancy[`AJNI-T${track}`] ? 'bg-red-700 text-white' : 'bg-green-700 text-white'}`}>
+                                {trackOccupancy[`AJNI-T${track}`] ? 'OCCUPIED' : 'CLEAR'}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            
+            {/* Station info panel */}
+            <div className="absolute bottom-2 left-2 bg-gray-800 px-3 py-2 rounded shadow text-xs">
+                <div className="font-bold text-yellow-400 mb-1">Station Info</div>
+                <div className="text-gray-300">
+                    <div>Code: AJNI</div>
+                    <div>Platforms: 4</div>
+                    <div>Track Lines: 4</div>
+                    <div>Type: Junction</div>
+                    <div>Status: Operational</div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Nagpur layout (keeping the complex multi-platform layout)
 const NagpurYardLayout = ({ activeTrains, points, signals, onPointToggle, onSignalToggle, trackOccupancy = {} }) => {
     const trainPositions = {
         "P1": { x: 700, y: 180 },
@@ -219,15 +562,16 @@ const NagpurYardLayout = ({ activeTrains, points, signals, onPointToggle, onSign
                 </g>
                 
                 {/* Point switches */}
-                {points.map(p => <PointSwitch key={p.id} point={p} onToggle={onPointToggle} />)}
+                {points.filter(p => p.id.startsWith('P10')).map(p => <PointSwitch key={p.id} point={p} onToggle={onPointToggle} />)}
                 
                 {/* Signals */}
-                {signals.map(s => (
+                {signals.filter(s => ['H1', 'H2', 'S1', 'S2', 'S3', 'S4', 'S8'].includes(s.id)).map(s => (
                     <SignalPost key={s.id} signal={s} onToggle={onSignalToggle} />
                 ))}
+                
                 {/* Signal Status Legend */}
                 <g>
-                    {signals.map((s, idx) => (
+                    {signals.filter(s => ['H1', 'H2', 'S1', 'S2', 'S3', 'S4', 'S8'].includes(s.id)).map((s, idx) => (
                         <text key={s.id} x={1200} y={30 + idx * 18} fontSize="12" fill={s.status === 'GREEN' ? '#22c55e' : s.status === 'YELLOW' ? '#facc15' : '#ef4444'}>
                             {s.id}: {s.status}
                         </text>
@@ -368,118 +712,54 @@ const TrainControlViewer = () => {
                 setRailwayData(prev => {
                     const updatedTrains = [...prev.active_trains];
                     const newTrackOccupancy = { ...trackOccupancy };
+                    
                     // Clear previous occupancy
                     Object.keys(newTrackOccupancy).forEach(key => {
                         newTrackOccupancy[key] = null;
                     });
+                    
                     // Update each train based on its status
-                    // --- Professional Train Movement Logic ---
                     updatedTrains.forEach((train, index) => {
-                        // --- Helper Functions ---
-                        const getSignalForSection = (section) => {
-                            if (section === "BTBR-AJNI") return prev.signals.find(s => s.route === "BTBR-AJNI");
-                            if (section === "AJNI-NGP") return prev.signals.find(s => s.route === "AJNI-NGP");
-                            if (section === "NGP-G") return prev.signals.find(s => s.route === "GONDIA-NGP");
-                            return null;
-                        };
-                        const isSectionClear = (section) => !newTrackOccupancy[section];
-                        const isSignalGreen = (signal) => signal && signal.status === "GREEN";
-                        // --- Point Logic ---
-                        const getRequiredPoints = (section) => {
-                            // Example: BTBR-AJNI requires P101A NORMAL, AJNI-NGP requires P102A NORMAL, NGPG requires P104 NORMAL
-                            if (section === "BTBR-AJNI") return [{ id: "P101A", position: "NORMAL" }];
-                            if (section === "AJNI-NGP") return [{ id: "P102A", position: "NORMAL" }];
-                            if (section === "NGP-G") return [{ id: "P104", position: "NORMAL" }];
-                            return [];
-                        };
-                        const arePointsSet = (section) => {
-                            const required = getRequiredPoints(section);
-                            return required.every(req => {
-                                const pt = prev.points.find(p => p.id === req.id);
-                                return pt && pt.position === req.position && pt.status === "WORKING" && !pt.locked;
-                            });
-                        };
-                        // --- RUNNING ---
                         if (train.status === "RUNNING") {
-                            let canMove = false;
-                            let nextSection = train.position.section;
-                            let signal = getSignalForSection(nextSection);
-                            if (isSignalGreen(signal) && isSectionClear(nextSection) && arePointsSet(nextSection)) {
-                                canMove = true;
-                            }
-                            if (canMove) {
-                                // Move train
-                                if (train.position.section === "BTBR-AJNI") {
-                                    train.position.km_from_WR += 0.1;
-                                    newTrackOccupancy["BTBR-AJNI"] = train.id;
-                                    if (train.position.km_from_WR > 75.8) {
-                                        train.position = { section: "AJNI-NGP", km_from_WR: 76.0 };
-                                    }
-                                } else if (train.position.section === "AJNI-NGP") {
-                                    train.position.km_from_WR += 0.1;
-                                    newTrackOccupancy["AJNI-NGP"] = train.id;
-                                    if (train.position.km_from_WR >= 78.7) {
-                                        // Train has arrived at station
-                                        let platform = "P1";
-                                        // Find available platform
-                                        const occupiedPlatforms = updatedTrains
-                                            .filter(t => t.position.platform)
-                                            .map(t => t.position.platform);
-                                        for (let i = 1; i <= 8; i++) {
-                                            if (!occupiedPlatforms.includes(`P${i}`)) {
-                                                platform = `P${i}`;
-                                                break;
-                                            }
-                                        }
-                                        train.position = { station: "NGP", platform };
-                                        train.status = "STOPPED";
-                                        train.speed = 0;
-                                        newTrackOccupancy[platform] = train.id;
-                                        // Add arrival notification
-                                        setActiveAlarms(alarms => [...alarms, {
-                                            id: Date.now(),
-                                            type: "TRAIN_ARRIVED",
-                                            location: `NGP-${platform}`,
-                                            severity: "INFO",
-                                            timestamp: new Date().toISOString(),
-                                            acknowledged: false,
-                                            message: `Train ${train.id} (${train.name}) arrived at platform ${platform}`
-                                        }]);
-                                    }
-                                } else if (train.position.section === "NGP-G") {
-                                    train.position.km_from_WR += 0.1;
-                                    newTrackOccupancy["NGP-G"] = train.id;
-                                    // Train exiting the visible area
-                                    if (train.position.km_from_WR > 130) {
-                                        // Remove train from simulation or reset position
-                                        updatedTrains.splice(index, 1);
-                                    }
+                            // Simple movement simulation
+                            if (train.position.section === "BTBR-AJNI") {
+                                train.position.km_from_WR += 0.1;
+                                newTrackOccupancy["BTBR-AJNI"] = train.id;
+                                if (train.position.km_from_WR > 75.8) {
+                                    train.position = { section: "AJNI-NGP", km_from_WR: 76.0 };
                                 }
-                            } else {
-                                // Train waits for signal, clear track, or correct points
-                                train.speed = 0;
-                                // Alarm for incorrect points
-                                if (!arePointsSet(nextSection)) {
-                                    setActiveAlarms(alarms => [...alarms, {
-                                        id: Date.now(),
-                                        type: "POINT_MISMATCH",
-                                        location: nextSection,
-                                        severity: "HIGH",
-                                        timestamp: new Date().toISOString(),
-                                        acknowledged: false,
-                                        message: `Train ${train.id} cannot proceed: points not set for ${nextSection}`
-                                    }]);
+                            } else if (train.position.section === "AJNI-NGP") {
+                                train.position.km_from_WR += 0.1;
+                                newTrackOccupancy["AJNI-NGP"] = train.id;
+                                if (train.position.km_from_WR >= 78.7) {
+                                    // Arrive at NGP
+                                    const availablePlatforms = ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"];
+                                    const occupiedPlatforms = updatedTrains
+                                        .filter(t => t.position.platform)
+                                        .map(t => t.position.platform);
+                                    const freePlatform = availablePlatforms.find(p => !occupiedPlatforms.includes(p)) || "P1";
+                                    
+                                    train.position = { station: "NGP", platform: freePlatform };
+                                    train.status = "STOPPED";
+                                    train.speed = 0;
+                                    newTrackOccupancy[`NGP-${freePlatform}`] = train.id;
+                                }
+                            } else if (train.position.section === "NGP-G") {
+                                train.position.km_from_WR += 0.1;
+                                newTrackOccupancy["NGP-G"] = train.id;
+                                if (train.position.km_from_WR > 220) {
+                                    // Train exits simulation
+                                    updatedTrains.splice(index, 1);
                                 }
                             }
-                        }
-                        // --- APPROACHING ---
-                        else if (train.status === "APPROACHING") {
-                            train.status = "RUNNING";
-                        }
-                        // --- STOPPED ---
-                        else if (train.status === "STOPPED") {
+                        } else if (train.status === "STOPPED") {
+                            // Mark platform as occupied
+                            if (train.position.platform && train.position.station) {
+                                newTrackOccupancy[`${train.position.station}-${train.position.platform}`] = train.id;
+                            }
+                            
                             // Randomly depart some trains
-                            if (Math.random() < 0.01) { // 1% chance each interval
+                            if (Math.random() < 0.005) { // 0.5% chance each interval
                                 train.status = "RUNNING";
                                 train.speed = 30 + Math.floor(Math.random() * 50);
                                 train.position = { 
@@ -487,22 +767,11 @@ const TrainControlViewer = () => {
                                     km_from_WR: 85.0
                                 };
                                 newTrackOccupancy["NGP-G"] = train.id;
-                                // Add departure notification
-                                setActiveAlarms(alarms => [...alarms, {
-                                    id: Date.now(),
-                                    type: "TRAIN_DEPARTED",
-                                    location: `NGP`,
-                                    severity: "INFO",
-                                    timestamp: new Date().toISOString(),
-                                    acknowledged: false,
-                                    message: `Train ${train.id} (${train.name}) departed from platform ${train.position.platform}`
-                                }]);
-                            } else if (train.position.platform) {
-                                newTrackOccupancy[train.position.platform] = train.id;
                             }
                         }
                     });
-                    // Randomly add new train at 3% chance
+                    
+                    // Randomly add new train at 0.3% chance
                     if (Math.random() < 0.003) {
                         const trainIds = ["16031", "22619", "12723", "12810", "12441"];
                         const trainNames = ["Andaman Express", "Tirunelveli Exp", "Telangana Express", "Howrah Mail", "Shatabdi Express"];
@@ -519,21 +788,12 @@ const TrainControlViewer = () => {
                             direction: "UP"
                         });
                         newTrackOccupancy["BTBR-AJNI"] = randomId;
-                        // Add notification for new train
-                        setActiveAlarms(alarms => [...alarms, {
-                            id: Date.now(),
-                            type: "NEW_TRAIN",
-                            location: "BTBR-AJNI",
-                            severity: "INFO",
-                            timestamp: new Date().toISOString(),
-                            acknowledged: false,
-                            message: `Train ${randomId} (${randomName}) approaching from BTBR`
-                        }]);
                     }
+                    
                     setTrackOccupancy(newTrackOccupancy);
                     return { ...prev, active_trains: updatedTrains };
                 });
-            }, 500);
+            }, 1000);
         } else {
             if (simulationRef.current) {
                 clearInterval(simulationRef.current);
@@ -594,8 +854,115 @@ const TrainControlViewer = () => {
         setLastAction(trainSimulation ? "Simulation paused" : "Simulation started");
     };
 
-    // Expose alarms for NagpurYardLayout
+    // Render the appropriate station layout based on the selected station
+    const renderStationLayout = () => {
+        const stationCode = selectedStation?.code;
+        
+        switch(stationCode) {
+            case "NGP":
+                return (
+                    <NagpurYardLayout 
+                        activeTrains={railwayData.active_trains.filter(train => 
+                            (train.position.station === stationCode) || 
+                            train.position.section?.includes(stationCode)
+                        )} 
+                        points={railwayData.points}
+                        signals={railwayData.signals}
+                        onPointToggle={handlePointToggle}
+                        onSignalToggle={handleSignalToggle}
+                        trackOccupancy={trackOccupancy}
+                    />
+                );
+            case "AJNI":
+                return (
+                    <AjniStationLayout 
+                        activeTrains={railwayData.active_trains.filter(train => 
+                            (train.position.station === stationCode) || 
+                            train.position.section?.includes(stationCode)
+                        )} 
+                        points={railwayData.points}
+                        signals={railwayData.signals}
+                        onPointToggle={handlePointToggle}
+                        onSignalToggle={handleSignalToggle}
+                        trackOccupancy={trackOccupancy}
+                    />
+                );
+            case "WR":
+                return (
+                    <TwoTrackStationLayout 
+                        stationName="Wardha Junction"
+                        stationCode="WR"
+                        activeTrains={railwayData.active_trains.filter(train => 
+                            (train.position.station === stationCode) || 
+                            train.position.section?.includes(stationCode)
+                        )}
+                        points={railwayData.points}
+                        signals={railwayData.signals}
+                        onPointToggle={handlePointToggle}
+                        onSignalToggle={handleSignalToggle}
+                        trackOccupancy={trackOccupancy}
+                    />
+                );
+            case "SEGM":
+                return (
+                    <TwoTrackStationLayout 
+                        stationName="Sewagram"
+                        stationCode="SEGM"
+                        activeTrains={railwayData.active_trains.filter(train => 
+                            (train.position.station === stationCode) || 
+                            train.position.section?.includes(stationCode)
+                        )}
+                        points={railwayData.points}
+                        signals={railwayData.signals}
+                        onPointToggle={handlePointToggle}
+                        onSignalToggle={handleSignalToggle}
+                        trackOccupancy={trackOccupancy}
+                    />
+                );
+            case "BTBR":
+                return (
+                    <TwoTrackStationLayout 
+                        stationName="Butibori"
+                        stationCode="BTBR"
+                        activeTrains={railwayData.active_trains.filter(train => 
+                            (train.position.station === stationCode) || 
+                            train.position.section?.includes(stationCode)
+                        )}
+                        points={railwayData.points}
+                        signals={railwayData.signals}
+                        onPointToggle={handlePointToggle}
+                        onSignalToggle={handleSignalToggle}
+                        trackOccupancy={trackOccupancy}
+                    />
+                );
+            case "G":
+                return (
+                    <TwoTrackStationLayout 
+                        stationName="Gondia Junction"
+                        stationCode="G"
+                        activeTrains={railwayData.active_trains.filter(train => 
+                            (train.position.station === stationCode) || 
+                            train.position.section?.includes(stationCode)
+                        )}
+                        points={railwayData.points}
+                        signals={railwayData.signals}
+                        onPointToggle={handlePointToggle}
+                        onSignalToggle={handleSignalToggle}
+                        trackOccupancy={trackOccupancy}
+                    />
+                );
+            default:
+                return (
+                    <div className="flex items-center justify-center h-64 bg-[#0A1A30] rounded-lg border border-[#073f7c]">
+                        <p className="text-gray-400">Please select a station to view its layout</p>
+                    </div>
+                );
+        }
+    };
+
+    // Expose alarms for components that need access
     window.__activeAlarms = activeAlarms;
+    
     return (
         <div className="bg-gray-900 text-white min-h-screen font-sans">
             <header className="bg-[#073f7c] p-4 shadow-md border-b-2 border-[#FFA500] flex justify-between items-center">
@@ -613,6 +980,10 @@ const TrainControlViewer = () => {
                         <div className="text-sm text-gray-400">Current Time</div>
                         <div className="font-mono font-bold text-white">{currentTime.toLocaleTimeString()}</div>
                     </div>
+                    <div className="bg-gray-800/50 px-4 py-2 rounded-lg">
+                        <div className="text-sm text-gray-400">Selected Station</div>
+                        <div className="font-bold text-[#FFA500]">{selectedStation?.name || "None"}</div>
+                    </div>
                     <button 
                         onClick={toggleSimulation}
                         className={`px-6 py-2 rounded-lg font-bold transition-all ${trainSimulation ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
@@ -625,99 +996,161 @@ const TrainControlViewer = () => {
             <main className="container mx-auto p-4">
                 {/* Main 3D Station Simulation */}
                 <div className="mb-8">
-                    <RailwayStationSimulation />
+                    <RailwayStationSimulation stationCode={selectedStation?.code} />
                 </div>
                 
                 {/* Secondary Controls and Data */}
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                     <div className="xl:col-span-2 flex flex-col gap-4">
                         <div className="bg-[#0A1A30] p-4 rounded-lg shadow-lg border border-[#073f7c]">
-                            <h2 className="text-lg font-semibold mb-4 text-[#FFA500] border-b border-gray-700 pb-2">Route Stations: Wardha ↔ Gondia <span className="text-xs text-gray-400">{railwayData.stations[0].km} - {railwayData.stations[railwayData.stations.length-1].km} km, Distance: {(railwayData.stations[railwayData.stations.length-1].km - railwayData.stations[0].km).toFixed(1)} km</span></h2>
+                            <h2 className="text-lg font-semibold mb-4 text-[#FFA500] border-b border-gray-700 pb-2">
+                                Route Stations: Wardha ↔ Gondia 
+                                <span className="text-xs text-gray-400 ml-2">
+                                    {railwayData.stations[0].km} - {railwayData.stations[railwayData.stations.length-1].km} km, 
+                                    Distance: {(railwayData.stations[railwayData.stations.length-1].km - railwayData.stations[0].km).toFixed(1)} km
+                                </span>
+                            </h2>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
                                 {railwayData.stations.map(station => (
                                     <motion.div 
                                         key={station.code} 
-                                        whileHover={{ y: -2 }} 
+                                        whileHover={{ y: -2, scale: 1.05 }} 
+                                        whileTap={{ scale: 0.95 }}
                                         onClick={() => handleStationClick(station)} 
-                                        className={`p-2 text-center rounded-md cursor-pointer transition-all border-2 ${
+                                        className={`p-3 text-center rounded-lg cursor-pointer transition-all border-2 ${
                                             selectedStation?.code === station.code 
-                                                ? 'bg-blue-800 border-blue-400' 
-                                                : 'bg-gray-700 border-gray-600 hover:border-gray-500'
+                                                ? 'bg-blue-800 border-blue-400 shadow-lg shadow-blue-500/25' 
+                                                : 'bg-gray-700 border-gray-600 hover:border-gray-500 hover:bg-gray-600'
                                         }`}
                                     >
-                                        <div className="font-bold">{station.code}</div>
-                                        <div className="text-xs text-gray-300">{station.name}</div>
+                                        <div className="font-bold text-lg">{station.code}</div>
+                                        <div className="text-xs text-gray-300 truncate">{station.name}</div>
                                         <div className="text-xs text-gray-400">{station.km} km</div>
+                                        <div className="text-xs text-green-400">
+                                            {station.trackLines} track{station.trackLines > 1 ? 's' : ''}
+                                        </div>
+                                        {/* Active train count indicator */}
+                                        <div className="mt-1">
+                                            {(() => {
+                                                const stationTrains = railwayData.active_trains.filter(train => 
+                                                    train.position.station === station.code ||
+                                                    (train.position.section && train.position.section.includes(station.code))
+                                                ).length;
+                                                return stationTrains > 0 ? (
+                                                    <span className="inline-block bg-red-600 text-white text-xs px-2 py-1 rounded-full">
+                                                        {stationTrains} train{stationTrains > 1 ? 's' : ''}
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-block bg-green-600 text-white text-xs px-2 py-1 rounded-full">
+                                                        Clear
+                                                    </span>
+                                                );
+                                            })()}
+                                        </div>
                                     </motion.div>
                                 ))}
                             </div>
                         </div>
 
-                        <NagpurYardLayout 
-                            activeTrains={railwayData.active_trains.filter(train => 
-                                (train.position.station === selectedStation?.code) || 
-                                train.position.section?.includes(selectedStation?.code)
-                            )} 
-                            points={railwayData.points}
-                            signals={railwayData.signals}
-                            onPointToggle={handlePointToggle}
-                            onSignalToggle={handleSignalToggle}
-                            trackOccupancy={trackOccupancy}
-                        />
+                        {/* Render the selected station's layout */}
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={selectedStation?.code}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                {renderStationLayout()}
+                            </motion.div>
+                        </AnimatePresence>
                         
                         <div className="bg-[#0A1A30] p-4 rounded-lg shadow-lg border border-[#073f7c]">
                             <div className="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
                                 <h2 className="text-lg font-semibold text-[#FFA500]">Live Train Traffic</h2>
-                                <div className="text-sm">
-                                    <span className="text-gray-400">Last action: </span>
-                                    <span className="font-mono">{lastAction || "No actions yet"}</span>
+                                <div className="flex items-center gap-4">
+                                    <div className="text-sm">
+                                        <span className="text-gray-400">Total Trains: </span>
+                                        <span className="font-bold text-white">{railwayData.active_trains.length}</span>
+                                    </div>
+                                    <div className="text-sm">
+                                        <span className="text-gray-400">Last action: </span>
+                                        <span className="font-mono text-green-400">{lastAction || "No actions yet"}</span>
+                                    </div>
                                 </div>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead className="bg-gray-800">
                                         <tr>
-                                            <th className="py-2 px-3 text-left">Train</th>
-                                            <th className="py-2 px-3 text-left">Location</th>
-                                            <th className="py-2 px-3 text-right">Speed</th>
-                                            <th className="py-2 px-3 text-center">Status</th>
-                                            <th className="py-2 px-3 text-right">ETA/ETD</th>
-                                            <th className="py-2 px-3 text-center">Actions</th>
+                                            <th className="py-3 px-4 text-left font-semibold">Train Details</th>
+                                            <th className="py-3 px-4 text-left font-semibold">Current Location</th>
+                                            <th className="py-3 px-4 text-right font-semibold">Speed</th>
+                                            <th className="py-3 px-4 text-center font-semibold">Status</th>
+                                            <th className="py-3 px-4 text-right font-semibold">Schedule</th>
+                                            <th className="py-3 px-4 text-center font-semibold">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-700">
                                         {railwayData.active_trains.map(train => (
-                                            <tr key={train.id} className="hover:bg-gray-800/50">
-                                                <td className="py-3 px-3">
-                                                    <div className="font-medium">{train.id}</div>
-                                                    <div className="text-xs text-gray-400">{train.name}</div>
+                                            <motion.tr 
+                                                key={train.id} 
+                                                className="hover:bg-gray-800/50 transition-colors"
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                            >
+                                                <td className="py-4 px-4">
+                                                    <div className="font-medium text-white">{train.id}</div>
+                                                    <div className="text-xs text-gray-400 max-w-32 truncate">{train.name}</div>
+                                                    <div className="text-xs text-blue-400">{train.direction}</div>
                                                 </td>
-                                                <td className="py-3 px-3">
-                                                    {train.position.station 
-                                                        ? `${train.position.station} (PF ${train.position.platform})` 
-                                                        : `${train.position.section} @ KM ${train.position.km_from_WR.toFixed(1)}`
-                                                    }
+                                                <td className="py-4 px-4">
+                                                    <div className="font-mono text-sm">
+                                                        {train.position.station 
+                                                            ? (
+                                                                <div>
+                                                                    <span className="text-green-400">{train.position.station}</span>
+                                                                    <br />
+                                                                    <span className="text-xs text-gray-400">Platform {train.position.platform}</span>
+                                                                </div>
+                                                            )
+                                                            : (
+                                                                <div>
+                                                                    <span className="text-yellow-400">{train.position.section}</span>
+                                                                    <br />
+                                                                    <span className="text-xs text-gray-400">KM {train.position.km_from_WR?.toFixed(1)}</span>
+                                                                </div>
+                                                            )
+                                                        }
+                                                    </div>
                                                 </td>
-                                                <td className="py-3 px-3 text-right">
-                                                    {train.speed} km/h
+                                                <td className="py-4 px-4 text-right">
+                                                    <div className="font-mono font-bold">
+                                                        {train.speed} <span className="text-xs text-gray-400">km/h</span>
+                                                    </div>
                                                 </td>
-                                                <td className="py-3 px-3 text-center">
-                                                    <span className={`px-2 py-1 rounded text-xs ${getStatusColor(train.status)}`}>
+                                                <td className="py-4 px-4 text-center">
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(train.status)}`}>
                                                         {train.status}
                                                     </span>
                                                 </td>
-                                                <td className="py-3 px-3 text-right">
-                                                    {formatTime(train.scheduled_arrival || train.scheduled_departure)}
+                                                <td className="py-4 px-4 text-right">
+                                                    <div className="font-mono">
+                                                        {formatTime(train.scheduled_arrival || train.scheduled_departure)}
+                                                    </div>
                                                     {train.delayed_by_min > 0 && (
-                                                        <div className="text-xs text-red-400">+{train.delayed_by_min}m</div>
+                                                        <div className="text-xs text-red-400 font-medium">
+                                                            Delayed +{train.delayed_by_min}m
+                                                        </div>
                                                     )}
                                                 </td>
-                                                <td className="py-3 px-3 text-center">
-                                                    <button className="px-2 py-1 bg-blue-700 hover:bg-blue-800 rounded text-xs">
+                                                <td className="py-4 px-4 text-center">
+                                                    <button className="px-3 py-1 bg-blue-700 hover:bg-blue-800 rounded text-xs font-medium transition-colors">
                                                         Details
                                                     </button>
                                                 </td>
-                                            </tr>
+                                            </motion.tr>
                                         ))}
                                     </tbody>
                                 </table>
@@ -733,6 +1166,7 @@ const TrainControlViewer = () => {
                             onPointChange={handlePointToggle}
                             onSignalChange={handleSignalToggle}
                             currentTime={currentTime}
+                            selectedStation={selectedStation}
                         />
                     </div>
                 </div>
