@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import TrainControlOperator from './TrainControlOperator';
 import RailwayStationSimulation from './RailwayStationSimulation';
 
 // --- ENRICHED DATA with SIGNALS, POINTS, and ROUTES ---
@@ -29,78 +28,78 @@ const initialRailwayData = {
     ],
     points: [
         // NGP Points
-        { id: "P101A", position: "NORMAL", locked: true, status: "WORKING", coords: { x: 350, y: 115 } },
-        { id: "P101B", position: "REVERSE", locked: true, status: "WORKING", coords: { x: 350, y: 205 } },
-        { id: "P102A", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 1050, y: 165 } },
-        { id: "P102B", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 1050, y: 205 } },
-        { id: "P103", position: "REVERSE", locked: false, status: "MAINTENANCE", coords: { x: 370, y: 305 } },
-        { id: "P104", position: "NORMAL", locked: true, status: "WORKING", coords: { x: 370, y: 450 } },
+        { id: "P101A", position: "NORMAL", locked: true, status: "WORKING", coords: { x: 350, y: 115 }, stationCode: "NGP" },
+        { id: "P101B", position: "REVERSE", locked: true, status: "WORKING", coords: { x: 350, y: 205 }, stationCode: "NGP" },
+        { id: "P102A", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 1050, y: 165 }, stationCode: "NGP" },
+        { id: "P102B", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 1050, y: 205 }, stationCode: "NGP" },
+        { id: "P103", position: "REVERSE", locked: false, status: "MAINTENANCE", coords: { x: 370, y: 305 }, stationCode: "NGP" },
+        { id: "P104", position: "NORMAL", locked: true, status: "WORKING", coords: { x: 370, y: 450 }, stationCode: "NGP" },
         
         // WR Points (2 track lines)
-        { id: "WR101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 175 } },
-        { id: "WR102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 175 } },
+        { id: "WR101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 175 }, stationCode: "WR" },
+        { id: "WR102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 175 }, stationCode: "WR" },
         
         // SEGM Points (2 track lines)
-        { id: "SEGM101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 175 } },
-        { id: "SEGM102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 175 } },
+        { id: "SEGM101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 175 }, stationCode: "SEGM" },
+        { id: "SEGM102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 175 }, stationCode: "SEGM" },
         
         // BTBR Points (2 track lines)
-        { id: "BTBR101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 175 } },
-        { id: "BTBR102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 175 } },
+        { id: "BTBR101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 175 }, stationCode: "BTBR" },
+        { id: "BTBR102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 175 }, stationCode: "BTBR" },
         
         // AJNI Points (4 track lines)
-        { id: "AJNI101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 150 } },
-        { id: "AJNI102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 200 } },
-        { id: "AJNI103", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 150 } },
-        { id: "AJNI104", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 200 } },
+        { id: "AJNI101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 150 }, stationCode: "AJNI" },
+        { id: "AJNI102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 200 }, stationCode: "AJNI" },
+        { id: "AJNI103", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 150 }, stationCode: "AJNI" },
+        { id: "AJNI104", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 200 }, stationCode: "AJNI" },
         
         // G Points (2 track lines)
-        { id: "G101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 175 } },
-        { id: "G102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 175 } },
+        { id: "G101", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 300, y: 175 }, stationCode: "G" },
+        { id: "G102", position: "NORMAL", locked: false, status: "WORKING", coords: { x: 800, y: 175 }, stationCode: "G" },
     ],
     signals: [
         // NGP Signals
-        { id: "H1", type: "HOME", status: "YELLOW", coords: { x: 280, y: 115 }, route: "AJNI-NGP" },
-        { id: "S1", type: "STARTER", status: "RED", coords: { x: 810, y: 180 }, route: "P1-OUT" },
-        { id: "S2", type: "STARTER", status: "RED", coords: { x: 810, y: 230 }, route: "P2-OUT" },
-        { id: "S3", type: "STARTER", status: "GREEN", coords: { x: 810, y: 280 }, route: "P3-OUT" },
-        { id: "S4", type: "STARTER", status: "RED", coords: { x: 810, y: 330 }, route: "P4-OUT" },
-        { id: "S8", type: "STARTER", status: "YELLOW", coords: { x: 810, y: 450 }, route: "P8-OUT" },
-        { id: "H2", type: "HOME", status: "RED", coords: { x: 1100, y: 115 }, route: "GONDIA-NGP" },
+        { id: "H1", type: "HOME", status: "YELLOW", coords: { x: 280, y: 115 }, route: "AJNI-NGP", stationCode: "NGP" },
+        { id: "S1", type: "STARTER", status: "RED", coords: { x: 810, y: 180 }, route: "P1-OUT", stationCode: "NGP" },
+        { id: "S2", type: "STARTER", status: "RED", coords: { x: 810, y: 230 }, route: "P2-OUT", stationCode: "NGP" },
+        { id: "S3", type: "STARTER", status: "GREEN", coords: { x: 810, y: 280 }, route: "P3-OUT", stationCode: "NGP" },
+        { id: "S4", type: "STARTER", status: "RED", coords: { x: 810, y: 330 }, route: "P4-OUT", stationCode: "NGP" },
+        { id: "S8", type: "STARTER", status: "YELLOW", coords: { x: 810, y: 450 }, route: "P8-OUT", stationCode: "NGP" },
+        { id: "H2", type: "HOME", status: "RED", coords: { x: 1100, y: 115 }, route: "GONDIA-NGP", stationCode: "NGP" },
         
         // WR Signals
-        { id: "WR_H1", type: "HOME", status: "GREEN", coords: { x: 250, y: 150 }, route: "ENTRY-WR" },
-        { id: "WR_H2", type: "HOME", status: "RED", coords: { x: 250, y: 200 }, route: "ENTRY-WR" },
-        { id: "WR_S1", type: "STARTER", status: "YELLOW", coords: { x: 850, y: 150 }, route: "EXIT-WR" },
-        { id: "WR_S2", type: "STARTER", status: "GREEN", coords: { x: 850, y: 200 }, route: "EXIT-WR" },
+        { id: "WR_H1", type: "HOME", status: "GREEN", coords: { x: 250, y: 150 }, route: "ENTRY-WR", stationCode: "WR" },
+        { id: "WR_H2", type: "HOME", status: "RED", coords: { x: 250, y: 200 }, route: "ENTRY-WR", stationCode: "WR" },
+        { id: "WR_S1", type: "STARTER", status: "YELLOW", coords: { x: 850, y: 150 }, route: "EXIT-WR", stationCode: "WR" },
+        { id: "WR_S2", type: "STARTER", status: "GREEN", coords: { x: 850, y: 200 }, route: "EXIT-WR", stationCode: "WR" },
         
         // SEGM Signals
-        { id: "SEGM_H1", type: "HOME", status: "RED", coords: { x: 250, y: 150 }, route: "ENTRY-SEGM" },
-        { id: "SEGM_H2", type: "HOME", status: "YELLOW", coords: { x: 250, y: 200 }, route: "ENTRY-SEGM" },
-        { id: "SEGM_S1", type: "STARTER", status: "GREEN", coords: { x: 850, y: 150 }, route: "EXIT-SEGM" },
-        { id: "SEGM_S2", type: "STARTER", status: "RED", coords: { x: 850, y: 200 }, route: "EXIT-SEGM" },
+        { id: "SEGM_H1", type: "HOME", status: "RED", coords: { x: 250, y: 150 }, route: "ENTRY-SEGM", stationCode: "SEGM" },
+        { id: "SEGM_H2", type: "HOME", status: "YELLOW", coords: { x: 250, y: 200 }, route: "ENTRY-SEGM", stationCode: "SEGM" },
+        { id: "SEGM_S1", type: "STARTER", status: "GREEN", coords: { x: 850, y: 150 }, route: "EXIT-SEGM", stationCode: "SEGM" },
+        { id: "SEGM_S2", type: "STARTER", status: "RED", coords: { x: 850, y: 200 }, route: "EXIT-SEGM", stationCode: "SEGM" },
         
         // BTBR Signals
-        { id: "BTBR_H1", type: "HOME", status: "YELLOW", coords: { x: 250, y: 150 }, route: "ENTRY-BTBR" },
-        { id: "BTBR_H2", type: "HOME", status: "GREEN", coords: { x: 250, y: 200 }, route: "ENTRY-BTBR" },
-        { id: "BTBR_S1", type: "STARTER", status: "RED", coords: { x: 850, y: 150 }, route: "EXIT-BTBR" },
-        { id: "BTBR_S2", type: "STARTER", status: "YELLOW", coords: { x: 850, y: 200 }, route: "EXIT-BTBR" },
+        { id: "BTBR_H1", type: "HOME", status: "YELLOW", coords: { x: 250, y: 150 }, route: "ENTRY-BTBR", stationCode: "BTBR" },
+        { id: "BTBR_H2", type: "HOME", status: "GREEN", coords: { x: 250, y: 200 }, route: "ENTRY-BTBR", stationCode: "BTBR" },
+        { id: "BTBR_S1", type: "STARTER", status: "RED", coords: { x: 850, y: 150 }, route: "EXIT-BTBR", stationCode: "BTBR" },
+        { id: "BTBR_S2", type: "STARTER", status: "YELLOW", coords: { x: 850, y: 200 }, route: "EXIT-BTBR", stationCode: "BTBR" },
         
         // AJNI Signals (4 lines)
-        { id: "AJNI_H1", type: "HOME", status: "GREEN", coords: { x: 250, y: 130 }, route: "ENTRY-AJNI" },
-        { id: "AJNI_H2", type: "HOME", status: "RED", coords: { x: 250, y: 180 }, route: "ENTRY-AJNI" },
-        { id: "AJNI_H3", type: "HOME", status: "YELLOW", coords: { x: 250, y: 230 }, route: "ENTRY-AJNI" },
-        { id: "AJNI_H4", type: "HOME", status: "GREEN", coords: { x: 250, y: 280 }, route: "ENTRY-AJNI" },
-        { id: "AJNI_S1", type: "STARTER", status: "RED", coords: { x: 850, y: 130 }, route: "EXIT-AJNI" },
-        { id: "AJNI_S2", type: "STARTER", status: "YELLOW", coords: { x: 850, y: 180 }, route: "EXIT-AJNI" },
-        { id: "AJNI_S3", type: "STARTER", status: "GREEN", coords: { x: 850, y: 230 }, route: "EXIT-AJNI" },
-        { id: "AJNI_S4", type: "STARTER", status: "RED", coords: { x: 850, y: 280 }, route: "EXIT-AJNI" },
+        { id: "AJNI_H1", type: "HOME", status: "GREEN", coords: { x: 250, y: 130 }, route: "ENTRY-AJNI", stationCode: "AJNI" },
+        { id: "AJNI_H2", type: "HOME", status: "RED", coords: { x: 250, y: 180 }, route: "ENTRY-AJNI", stationCode: "AJNI" },
+        { id: "AJNI_H3", type: "HOME", status: "YELLOW", coords: { x: 250, y: 230 }, route: "ENTRY-AJNI", stationCode: "AJNI" },
+        { id: "AJNI_H4", type: "HOME", status: "GREEN", coords: { x: 250, y: 280 }, route: "ENTRY-AJNI", stationCode: "AJNI" },
+        { id: "AJNI_S1", type: "STARTER", status: "RED", coords: { x: 850, y: 130 }, route: "EXIT-AJNI", stationCode: "AJNI" },
+        { id: "AJNI_S2", type: "STARTER", status: "YELLOW", coords: { x: 850, y: 180 }, route: "EXIT-AJNI", stationCode: "AJNI" },
+        { id: "AJNI_S3", type: "STARTER", status: "GREEN", coords: { x: 850, y: 230 }, route: "EXIT-AJNI", stationCode: "AJNI" },
+        { id: "AJNI_S4", type: "STARTER", status: "RED", coords: { x: 850, y: 280 }, route: "EXIT-AJNI", stationCode: "AJNI" },
         
         // G Signals
-        { id: "G_H1", type: "HOME", status: "RED", coords: { x: 250, y: 150 }, route: "ENTRY-G" },
-        { id: "G_H2", type: "HOME", status: "GREEN", coords: { x: 250, y: 200 }, route: "ENTRY-G" },
-        { id: "G_S1", type: "STARTER", status: "YELLOW", coords: { x: 850, y: 150 }, route: "EXIT-G" },
-        { id: "G_S2", type: "STARTER", status: "RED", coords: { x: 850, y: 200 }, route: "EXIT-G" },
+        { id: "G_H1", type: "HOME", status: "RED", coords: { x: 250, y: 150 }, route: "ENTRY-G", stationCode: "G" },
+        { id: "G_H2", type: "HOME", status: "GREEN", coords: { x: 250, y: 200 }, route: "ENTRY-G", stationCode: "G" },
+        { id: "G_S1", type: "STARTER", status: "YELLOW", coords: { x: 850, y: 150 }, route: "EXIT-G", stationCode: "G" },
+        { id: "G_S2", type: "STARTER", status: "RED", coords: { x: 850, y: 200 }, route: "EXIT-G", stationCode: "G" },
     ],
     routes: [
         { id: "R1", from: "AJNI", to: "NGP-P1", status: "AVAILABLE", path: "H1-P101A-S1" },
@@ -218,8 +217,8 @@ const TwoTrackStationLayout = ({ stationName, stationCode, activeTrains, points,
         return null;
     };
 
-    const stationSignals = signals.filter(s => s.id.startsWith(stationCode));
-    const stationPoints = points.filter(p => p.id.startsWith(stationCode));
+    const stationSignals = signals.filter(s => s.stationCode === stationCode || s.id.startsWith(stationCode));
+    const stationPoints = points.filter(p => p.stationCode === stationCode || p.id.startsWith(stationCode));
 
     return (
         <div className="relative bg-[#0A1A30] w-full h-[580px] p-2 overflow-hidden rounded-lg border-2 border-[#073f7c]">
@@ -351,8 +350,8 @@ const AjniStationLayout = ({ activeTrains, points, signals, onPointToggle, onSig
         return null;
     };
 
-    const ajniSignals = signals.filter(s => s.id.startsWith('AJNI'));
-    const ajniPoints = points.filter(p => p.id.startsWith('AJNI'));
+    const ajniSignals = signals.filter(s => s.stationCode === 'AJNI' || s.id.startsWith('AJNI'));
+    const ajniPoints = points.filter(p => p.stationCode === 'AJNI' || p.id.startsWith('AJNI'));
 
     return (
         <div className="relative bg-[#0A1A30] w-full h-[580px] p-2 overflow-hidden rounded-lg border-2 border-[#073f7c]">
@@ -495,6 +494,9 @@ const NagpurYardLayout = ({ activeTrains, points, signals, onPointToggle, onSign
         "P7": { x: 700, y: 380 },
         "P8": { x: 700, y: 450 }
     };
+
+    const ngpSignals = signals.filter(s => s.stationCode === 'NGP' || (!s.stationCode && !s.id.includes('_')));
+    const ngpPoints = points.filter(p => p.stationCode === 'NGP' || (!p.stationCode && !p.id.includes('101')));
     
     return (
         <div className="relative bg-[#0A1A30] w-full h-[580px] p-2 overflow-hidden rounded-lg border-2 border-[#073f7c]">
@@ -562,16 +564,16 @@ const NagpurYardLayout = ({ activeTrains, points, signals, onPointToggle, onSign
                 </g>
                 
                 {/* Point switches */}
-                {points.filter(p => p.id.startsWith('P10')).map(p => <PointSwitch key={p.id} point={p} onToggle={onPointToggle} />)}
+                {ngpPoints.map(p => <PointSwitch key={p.id} point={p} onToggle={onPointToggle} />)}
                 
                 {/* Signals */}
-                {signals.filter(s => ['H1', 'H2', 'S1', 'S2', 'S3', 'S4', 'S8'].includes(s.id)).map(s => (
+                {ngpSignals.map(s => (
                     <SignalPost key={s.id} signal={s} onToggle={onSignalToggle} />
                 ))}
                 
                 {/* Signal Status Legend */}
                 <g>
-                    {signals.filter(s => ['H1', 'H2', 'S1', 'S2', 'S3', 'S4', 'S8'].includes(s.id)).map((s, idx) => (
+                    {ngpSignals.map((s, idx) => (
                         <text key={s.id} x={1200} y={30 + idx * 18} fontSize="12" fill={s.status === 'GREEN' ? '#22c55e' : s.status === 'YELLOW' ? '#facc15' : '#ef4444'}>
                             {s.id}: {s.status}
                         </text>
@@ -662,16 +664,8 @@ const NagpurYardLayout = ({ activeTrains, points, signals, onPointToggle, onSign
             
             {/* Alarm Log */}
             <div className="absolute bottom-2 left-2 bg-gray-800 px-3 py-2 rounded shadow text-xs max-h-32 overflow-y-auto w-96">
-                <div className="font-bold text-yellow-400 mb-1">Alarm Log</div>
-                {Array.isArray(window.__activeAlarms) && window.__activeAlarms.length > 0 ? (
-                    window.__activeAlarms.slice(-6).reverse().map(alarm => (
-                        <div key={alarm.id} className={`mb-1 px-2 py-1 rounded ${alarm.severity === 'CRITICAL' ? 'bg-red-900 text-red-200' : alarm.severity === 'HIGH' ? 'bg-yellow-900 text-yellow-200' : 'bg-blue-900 text-blue-200'}`}>
-                            <span className="font-bold">[{alarm.type}]</span> {alarm.message}
-                        </div>
-                    ))
-                ) : (
-                    <div className="text-gray-400">No alarms</div>
-                )}
+                <div className="font-bold text-yellow-400 mb-1">System Log</div>
+                <div className="text-gray-400">All systems operational</div>
             </div>
             <div className="absolute bottom-2 right-2 bg-[#073f7c] px-2 py-1 rounded">
                 <div className="text-xs text-[#FFA500]">SYSTEM STATUS: OPERATIONAL</div>
@@ -683,17 +677,12 @@ const NagpurYardLayout = ({ activeTrains, points, signals, onPointToggle, onSign
 // --- MAIN VIEWER COMPONENT ---
 const TrainControlViewer = () => {
     const [railwayData, setRailwayData] = useState(initialRailwayData);
-    // Track occupancy: { section/platform: trainId }
     const [trackOccupancy, setTrackOccupancy] = useState({});
     const [selectedStation, setSelectedStation] = useState(railwayData.stations.find(s => s.code === 'NGP'));
     const [currentTime, setCurrentTime] = useState(new Date("2025-09-15T18:13:12+05:30"));
-    const [activeAlarms, setActiveAlarms] = useState([
-        { id: 1, type: "POINT_FAILURE", location: "P103", severity: "HIGH", timestamp: "2025-09-15T18:02:10Z", acknowledged: false, message: "Point P103 failed to move to normal position" },
-        { id: 2, type: "HOT_AXLE_DETECTED", location: "Train 12621", severity: "CRITICAL", timestamp: "2025-09-15T18:04:30Z", acknowledged: false, message: "Hot axle detected on coach S9 of Tamil Nadu Exp" },
-    ]);
+    const [activeAlarms, setActiveAlarms] = useState([]);
     const [lastAction, setLastAction] = useState(null);
     const [trainSimulation, setTrainSimulation] = useState(false);
-    const [showStationDemo, setShowStationDemo] = useState(true); // Auto-show 3D station
     const simulationRef = useRef(null);
 
     useEffect(() => {
@@ -811,13 +800,6 @@ const TrainControlViewer = () => {
         setLastAction(`Selected station: ${station.name}`);
     };
 
-    const acknowledgeAlarm = (alarmId) => {
-        setActiveAlarms(alarms => alarms.map(alarm => 
-            alarm.id === alarmId ? { ...alarm, acknowledged: true } : alarm
-        ));
-        setLastAction(`Alarm ${alarmId} acknowledged`);
-    };
-
     const handlePointToggle = (pointId) => {
         setRailwayData(prevData => {
             const newPoints = prevData.points.map(point => 
@@ -851,14 +833,21 @@ const TrainControlViewer = () => {
 
     const toggleSimulation = () => {
         setTrainSimulation(!trainSimulation);
-        setLastAction(trainSimulation ? "Simulation paused" : "Simulation started");
+        setLastAction(trainSimulation ? 'Live simulation paused' : 'Live simulation started');
     };
 
-    // Render the appropriate station layout based on the selected station
-    const renderStationLayout = () => {
-        const stationCode = selectedStation?.code;
+        const renderStationLayout = () => {
+        if (!selectedStation) {
+            return (
+                <div className="flex items-center justify-center h-64 bg-[#0A1A30] rounded-lg border border-[#073f7c]">
+                    <p className="text-gray-400">Please select a station to view its layout</p>
+                </div>
+            );
+        }
+
+        const stationCode = selectedStation.code;
         
-        switch(stationCode) {
+        switch (stationCode) {
             case "NGP":
                 return (
                     <NagpurYardLayout 
@@ -960,19 +949,22 @@ const TrainControlViewer = () => {
         }
     };
 
-    // Expose alarms for components that need access
-    window.__activeAlarms = activeAlarms;
+    // Expose railway data for the operator section
+    window.__railwayData = railwayData;
+    window.__setRailwayData = setRailwayData;
+    window.__selectedStation = selectedStation;
+    window.__currentTime = currentTime;
     
     return (
         <div className="bg-gray-900 text-white min-h-screen font-sans">
             <header className="bg-[#073f7c] p-4 shadow-md border-b-2 border-[#FFA500] flex justify-between items-center">
                 <div className="flex items-center">
                     <div className="w-12 h-12 bg-[#FFA500] rounded-full flex items-center justify-center mr-4">
-                        <span className="font-bold text-[#073f7c] text-lg">IR</span>
+                        <span className="font-bold text-[#073f7c] text-lg">🚄</span>
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">SignalSense</h1>
-                        <p className="text-sm text-gray-300">Railway Traffic Management System</p>
+                        <h1 className="text-2xl font-bold text-white">SignalSense AI - Railway Viewer</h1>
+                        <p className="text-sm text-gray-300">🤖 AI-Powered Railway Traffic Management • SIH 2024 🏆</p>
                     </div>
                 </div>
                 <div className="flex items-center space-x-6">
@@ -984,190 +976,259 @@ const TrainControlViewer = () => {
                         <div className="text-sm text-gray-400">Selected Station</div>
                         <div className="font-bold text-[#FFA500]">{selectedStation?.name || "None"}</div>
                     </div>
+                    <div className="bg-gray-800/50 px-4 py-2 rounded-lg">
+                        <div className="text-sm text-gray-400">Active Trains</div>
+                        <div className="font-bold text-green-400">{railwayData.active_trains.length}</div>
+                    </div>
                     <button 
                         onClick={toggleSimulation}
                         className={`px-6 py-2 rounded-lg font-bold transition-all ${trainSimulation ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
                     >
                         {trainSimulation ? 'Pause Live Data' : 'Start Live Data'}
                     </button>
+                    <div className="bg-blue-600/20 px-4 py-2 rounded-lg border border-blue-500">
+                        <div className="text-sm text-blue-300">View Only Mode</div>
+                        <div className="text-xs text-blue-400">For operations, use Control Panel</div>
+                    </div>
                 </div>
             </header>
             
             <main className="container mx-auto p-4">
-                {/* Main 3D Station Simulation */}
-                <div className="mb-8">
-                    <RailwayStationSimulation stationCode={selectedStation?.code} />
+                {/* Main 3D Station Simulation - Centered */}
+                <div className="mb-8 flex justify-center">
+                    <div className="w-full max-w-7xl">
+                        <RailwayStationSimulation 
+                            stationCode={selectedStation?.code} 
+                            onAlarmGenerate={(alarm) => {
+                                setActiveAlarms(prev => [...prev, {
+                                    ...alarm,
+                                    id: Date.now(),
+                                    timestamp: new Date().toISOString(),
+                                    acknowledged: false
+                                }]);
+                            }}
+                        />
+                    </div>
                 </div>
                 
-                {/* Secondary Controls and Data */}
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                    <div className="xl:col-span-2 flex flex-col gap-4">
-                        <div className="bg-[#0A1A30] p-4 rounded-lg shadow-lg border border-[#073f7c]">
-                            <h2 className="text-lg font-semibold mb-4 text-[#FFA500] border-b border-gray-700 pb-2">
-                                Route Stations: Wardha ↔ Gondia 
-                                <span className="text-xs text-gray-400 ml-2">
-                                    {railwayData.stations[0].km} - {railwayData.stations[railwayData.stations.length-1].km} km, 
-                                    Distance: {(railwayData.stations[railwayData.stations.length-1].km - railwayData.stations[0].km).toFixed(1)} km
-                                </span>
-                            </h2>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
-                                {railwayData.stations.map(station => (
-                                    <motion.div 
-                                        key={station.code} 
-                                        whileHover={{ y: -2, scale: 1.05 }} 
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => handleStationClick(station)} 
-                                        className={`p-3 text-center rounded-lg cursor-pointer transition-all border-2 ${
-                                            selectedStation?.code === station.code 
-                                                ? 'bg-blue-800 border-blue-400 shadow-lg shadow-blue-500/25' 
-                                                : 'bg-gray-700 border-gray-600 hover:border-gray-500 hover:bg-gray-600'
-                                        }`}
-                                    >
-                                        <div className="font-bold text-lg">{station.code}</div>
-                                        <div className="text-xs text-gray-300 truncate">{station.name}</div>
-                                        <div className="text-xs text-gray-400">{station.km} km</div>
-                                        <div className="text-xs text-green-400">
-                                            {station.trackLines} track{station.trackLines > 1 ? 's' : ''}
-                                        </div>
-                                        {/* Active train count indicator */}
-                                        <div className="mt-1">
-                                            {(() => {
-                                                const stationTrains = railwayData.active_trains.filter(train => 
-                                                    train.position.station === station.code ||
-                                                    (train.position.section && train.position.section.includes(station.code))
-                                                ).length;
-                                                return stationTrains > 0 ? (
-                                                    <span className="inline-block bg-red-600 text-white text-xs px-2 py-1 rounded-full">
-                                                        {stationTrains} train{stationTrains > 1 ? 's' : ''}
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-block bg-green-600 text-white text-xs px-2 py-1 rounded-full">
-                                                        Clear
-                                                    </span>
-                                                );
-                                            })()}
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Render the selected station's layout */}
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={selectedStation?.code}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                transition={{ duration: 0.3 }}
-                            >
-                                {renderStationLayout()}
-                            </motion.div>
-                        </AnimatePresence>
-                        
-                        <div className="bg-[#0A1A30] p-4 rounded-lg shadow-lg border border-[#073f7c]">
-                            <div className="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
-                                <h2 className="text-lg font-semibold text-[#FFA500]">Live Train Traffic</h2>
-                                <div className="flex items-center gap-4">
-                                    <div className="text-sm">
-                                        <span className="text-gray-400">Total Trains: </span>
-                                        <span className="font-bold text-white">{railwayData.active_trains.length}</span>
+                {/* Centered Main Content Area */}
+                <div className="flex flex-col gap-6 max-w-7xl mx-auto">
+                    {/* Station Selection Row */}
+                    <div className="bg-[#0A1A30] p-4 rounded-lg shadow-lg border border-[#073f7c]">
+                        <h2 className="text-lg font-semibold mb-4 text-[#FFA500] border-b border-gray-700 pb-2 flex items-center">
+                            🚄 Route Stations: Wardha ↔ Gondia 
+                            <span className="ml-2 text-xs bg-blue-500/20 px-2 py-1 rounded-full">
+                                View Only Mode
+                            </span>
+                            <span className="text-xs text-gray-400 ml-2">
+                                {railwayData.stations[0].km} - {railwayData.stations[railwayData.stations.length-1].km} km, 
+                                Distance: {(railwayData.stations[railwayData.stations.length-1].km - railwayData.stations[0].km).toFixed(1)} km
+                            </span>
+                        </h2>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+                            {railwayData.stations.map(station => (
+                                <motion.div 
+                                    key={station.code} 
+                                    whileHover={{ y: -2, scale: 1.05 }} 
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => handleStationClick(station)} 
+                                    className={`p-3 text-center rounded-lg cursor-pointer transition-all border-2 ${
+                                        selectedStation?.code === station.code 
+                                            ? 'bg-blue-800 border-blue-400 shadow-lg shadow-blue-500/25' 
+                                            : 'bg-gray-700 border-gray-600 hover:border-gray-500 hover:bg-gray-600'
+                                    }`}
+                                >
+                                    <div className="font-bold text-lg">{station.code}</div>
+                                    <div className="text-xs text-gray-300 truncate">{station.name}</div>
+                                    <div className="text-xs text-gray-400">{station.km} km</div>
+                                    <div className="text-xs text-green-400">
+                                        {station.trackLines} track{station.trackLines > 1 ? 's' : ''}
                                     </div>
-                                    <div className="text-sm">
-                                        <span className="text-gray-400">Last action: </span>
-                                        <span className="font-mono text-green-400">{lastAction || "No actions yet"}</span>
+                                    {/* Active train count indicator */}
+                                    <div className="mt-1">
+                                        {(() => {
+                                            const stationTrains = railwayData.active_trains.filter(train => 
+                                                train.position.station === station.code ||
+                                                (train.position.section && train.position.section.includes(station.code))
+                                            ).length;
+                                            return stationTrains > 0 ? (
+                                                <span className="inline-block bg-red-600 text-white text-xs px-2 py-1 rounded-full">
+                                                    {stationTrains} train{stationTrains > 1 ? 's' : ''}
+                                                </span>
+                                            ) : (
+                                                <span className="inline-block bg-green-600 text-white text-xs px-2 py-1 rounded-full">
+                                                    Clear
+                                                </span>
+                                            );
+                                        })()}
                                     </div>
-                                </div>
-                            </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-gray-800">
-                                        <tr>
-                                            <th className="py-3 px-4 text-left font-semibold">Train Details</th>
-                                            <th className="py-3 px-4 text-left font-semibold">Current Location</th>
-                                            <th className="py-3 px-4 text-right font-semibold">Speed</th>
-                                            <th className="py-3 px-4 text-center font-semibold">Status</th>
-                                            <th className="py-3 px-4 text-right font-semibold">Schedule</th>
-                                            <th className="py-3 px-4 text-center font-semibold">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-700">
-                                        {railwayData.active_trains.map(train => (
-                                            <motion.tr 
-                                                key={train.id} 
-                                                className="hover:bg-gray-800/50 transition-colors"
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                exit={{ opacity: 0 }}
-                                            >
-                                                <td className="py-4 px-4">
-                                                    <div className="font-medium text-white">{train.id}</div>
-                                                    <div className="text-xs text-gray-400 max-w-32 truncate">{train.name}</div>
-                                                    <div className="text-xs text-blue-400">{train.direction}</div>
-                                                </td>
-                                                <td className="py-4 px-4">
-                                                    <div className="font-mono text-sm">
-                                                        {train.position.station 
-                                                            ? (
-                                                                <div>
-                                                                    <span className="text-green-400">{train.position.station}</span>
-                                                                    <br />
-                                                                    <span className="text-xs text-gray-400">Platform {train.position.platform}</span>
-                                                                </div>
-                                                            )
-                                                            : (
-                                                                <div>
-                                                                    <span className="text-yellow-400">{train.position.section}</span>
-                                                                    <br />
-                                                                    <span className="text-xs text-gray-400">KM {train.position.km_from_WR?.toFixed(1)}</span>
-                                                                </div>
-                                                            )
-                                                        }
-                                                    </div>
-                                                </td>
-                                                <td className="py-4 px-4 text-right">
-                                                    <div className="font-mono font-bold">
-                                                        {train.speed} <span className="text-xs text-gray-400">km/h</span>
-                                                    </div>
-                                                </td>
-                                                <td className="py-4 px-4 text-center">
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(train.status)}`}>
-                                                        {train.status}
-                                                    </span>
-                                                </td>
-                                                <td className="py-4 px-4 text-right">
-                                                    <div className="font-mono">
-                                                        {formatTime(train.scheduled_arrival || train.scheduled_departure)}
-                                                    </div>
-                                                    {train.delayed_by_min > 0 && (
-                                                        <div className="text-xs text-red-400 font-medium">
-                                                            Delayed +{train.delayed_by_min}m
-                                                        </div>
-                                                    )}
-                                                </td>
-                                                <td className="py-4 px-4 text-center">
-                                                    <button className="px-3 py-1 bg-blue-700 hover:bg-blue-800 rounded text-xs font-medium transition-colors">
-                                                        Details
-                                                    </button>
-                                                </td>
-                                            </motion.tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                </motion.div>
+                            ))}
                         </div>
                     </div>
-                    <div>
-                        <TrainControlOperator 
-                            alarms={activeAlarms} 
-                            onAcknowledgeAlarm={acknowledgeAlarm} 
-                            points={railwayData.points} 
-                            signals={railwayData.signals}
-                            onPointChange={handlePointToggle}
-                            onSignalChange={handleSignalToggle}
-                            currentTime={currentTime}
-                            selectedStation={selectedStation}
-                        />
+
+                    {/* Station Layout Viewer - Centered */}
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={selectedStation?.code}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.3 }}
+                            className="flex justify-center"
+                        >
+                            <div className="w-full max-w-7xl">
+                                {renderStationLayout()}
+                            </div>
+                        </motion.div>
+                    </AnimatePresence>
+                    
+                    {/* Live Train Traffic Table */}
+                    <div className="bg-[#0A1A30] p-4 rounded-lg shadow-lg border border-[#073f7c]">
+                        <div className="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
+                            <h2 className="text-lg font-semibold text-[#FFA500] flex items-center">
+                                🚂 Live Train Traffic
+                                <span className="ml-2 text-xs bg-green-500/20 px-2 py-1 rounded-full">
+                                    Real-time Data
+                                </span>
+                            </h2>
+                            <div className="flex items-center gap-4">
+                                <div className="text-sm">
+                                    <span className="text-gray-400">Total Trains: </span>
+                                    <span className="font-bold text-white">{railwayData.active_trains.length}</span>
+                                </div>
+                                <div className="text-sm">
+                                    <span className="text-gray-400">Last action: </span>
+                                    <span className="font-mono text-green-400">{lastAction || "No actions yet"}</span>
+                                </div>
+                                <div className="text-sm">
+                                    <span className="text-gray-400">Simulation: </span>
+                                    <span className={`font-bold ${trainSimulation ? 'text-green-400' : 'text-red-400'}`}>
+                                        {trainSimulation ? 'ACTIVE' : 'PAUSED'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead className="bg-gray-800">
+                                    <tr>
+                                        <th className="py-3 px-4 text-left font-semibold">Train Details</th>
+                                        <th className="py-3 px-4 text-left font-semibold">Current Location</th>
+                                        <th className="py-3 px-4 text-right font-semibold">Speed</th>
+                                        <th className="py-3 px-4 text-center font-semibold">Status</th>
+                                        <th className="py-3 px-4 text-right font-semibold">Schedule</th>
+                                        <th className="py-3 px-4 text-center font-semibold">Priority</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-700">
+                                    {railwayData.active_trains.map(train => (
+                                        <motion.tr 
+                                            key={train.id} 
+                                            className="hover:bg-gray-800/50 transition-colors"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                        >
+                                            <td className="py-4 px-4">
+                                                <div className="font-medium text-white">{train.id}</div>
+                                                <div className="text-xs text-gray-400 max-w-32 truncate">{train.name}</div>
+                                                <div className="text-xs text-blue-400">{train.direction}</div>
+                                            </td>
+                                            <td className="py-4 px-4">
+                                                <div className="font-mono text-sm">
+                                                    {train.position.station 
+                                                        ? (
+                                                            <div>
+                                                                <span className="text-green-400">{train.position.station}</span>
+                                                                <br />
+                                                                <span className="text-xs text-gray-400">Platform {train.position.platform}</span>
+                                                            </div>
+                                                        )
+                                                        : (
+                                                            <div>
+                                                                <span className="text-yellow-400">{train.position.section}</span>
+                                                                <br />
+                                                                <span className="text-xs text-gray-400">KM {train.position.km_from_WR?.toFixed(1)}</span>
+                                                            </div>
+                                                        )
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td className="py-4 px-4 text-right">
+                                                <div className="font-mono font-bold">
+                                                    {train.speed} <span className="text-xs text-gray-400">km/h</span>
+                                                </div>
+                                                {train.speed > 0 && (
+                                                    <div className="text-xs text-blue-400">Moving</div>
+                                                )}
+                                            </td>
+                                            <td className="py-4 px-4 text-center">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(train.status)}`}>
+                                                    {train.status}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-4 text-right">
+                                                <div className="font-mono">
+                                                    {formatTime(train.scheduled_arrival || train.scheduled_departure)}
+                                                </div>
+                                                {train.delayed_by_min > 0 && (
+                                                    <div className="text-xs text-red-400 font-medium">
+                                                        Delayed +{train.delayed_by_min}m
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="py-4 px-4 text-center">
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <span className={`px-2 py-1 rounded text-xs ${
+                                                        train.id.startsWith('22') || train.id.startsWith('12') 
+                                                            ? 'bg-red-600 text-white' 
+                                                            : 'bg-blue-600 text-white'
+                                                    }`}>
+                                                        {train.id.startsWith('22') || train.id.startsWith('12') ? 'HIGH' : 'NORMAL'}
+                                                    </span>
+                                                    <button className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors">
+                                                        View Details
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </motion.tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* System Analytics Dashboard */}
+                    <div className="bg-[#0A1A30] p-4 rounded-lg shadow-lg border border-[#073f7c]">
+                        <h2 className="text-lg font-semibold mb-4 text-[#FFA500] border-b border-gray-700 pb-2 flex items-center">
+                            📊 System Analytics Dashboard
+                            <span className="ml-2 text-xs bg-purple-500/20 px-2 py-1 rounded-full">
+                                AI Insights
+                            </span>
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 p-4 rounded-lg border border-blue-500/30">
+                                <div className="text-sm text-blue-300 mb-1">Network Efficiency</div>
+                                <div className="text-2xl font-bold text-blue-400">94.2%</div>
+                                <div className="text-xs text-blue-300">+2.1% from yesterday</div>
+                            </div>
+                            <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 p-4 rounded-lg border border-green-500/30">
+                                <div className="text-sm text-green-300 mb-1">On-Time Performance</div>
+                                <div className="text-2xl font-bold text-green-400">87.5%</div>
+                                <div className="text-xs text-green-300">+0.8% from yesterday</div>
+                            </div>
+                            <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-800/20 p-4 rounded-lg border border-yellow-500/30">
+                                <div className="text-sm text-yellow-300 mb-1">Average Delay</div>
+                                <div className="text-2xl font-bold text-yellow-400">8.2m</div>
+                                <div className="text-xs text-yellow-300">-1.3m from yesterday</div>
+                            </div>
+                            <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 p-4 rounded-lg border border-purple-500/30">
+                                <div className="text-sm text-purple-300 mb-1">AI Predictions</div>
+                                <div className="text-2xl font-bold text-purple-400">96.8%</div>
+                                <div className="text-xs text-purple-300">Accuracy rate</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>

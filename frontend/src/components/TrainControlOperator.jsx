@@ -1,636 +1,617 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const TrainControlOperator = ({ 
-    alarms = [], 
-    onAcknowledgeAlarm, 
-    points = [], 
-    signals = [],
-    onPointChange,
-    onSignalChange,
-    currentTime,
-    selectedStation,
-    trainData = [],
-    onSimulationControl,
-    systemStatus = 'NORMAL'
-}) => {
-    const [activeTab, setActiveTab] = useState('alarms');
-    const [filteredAlarms, setFilteredAlarms] = useState([]);
-    const [alarmFilter, setAlarmFilter] = useState('all');
-    const [expandedAlarm, setExpandedAlarm] = useState(null);
+const TrainControlOperator = () => {
+    const [selectedStation, setSelectedStation] = useState(null);
+    const [railwayData, setRailwayData] = useState(null);
+    const [currentTime, setCurrentTime] = useState(new Date());
+    const [activeTab, setActiveTab] = useState('controls');
     const [commandHistory, setCommandHistory] = useState([
-        { id: 1, time: '16:02:05', command: 'System initialized - NGP Control', user: 'System', type: 'SYSTEM' },
-        { id: 2, time: '16:05:15', command: 'Signal H1 set to YELLOW', user: 'Operator', type: 'SIGNAL' },
-        { id: 3, time: '16:08:30', command: 'Point P102B set to NORMAL', user: 'Operator', type: 'POINT' }
+        { id: 1, time: '18:02:05', command: 'System initialized', user: 'System' },
+        { id: 2, time: '18:02:06', command: 'Awaiting station selection', user: 'System' },
+        { id: 3, time: '18:02:07', command: 'Control panel ready for operations', user: 'System' }
     ]);
     const [newCommand, setNewCommand] = useState('');
-    const [operatorId] = useState(`CR-OP-${new Date().getFullYear()}-${selectedStation?.code || 'NGP'}`);
-    const [sessionTime, setSessionTime] = useState(0);
+    const [lastAction, setLastAction] = useState('System Ready');
 
-    // Session timer
+    // Sync with viewer data
     useEffect(() => {
-        const timer = setInterval(() => {
-            setSessionTime(prev => prev + 1);
-        }, 1000);
-        return () => clearInterval(timer);
+        const interval = setInterval(() => {
+            // Get data from viewer if available
+            if (window.__railwayData) {
+                setRailwayData(window.__railwayData);
+            }
+            if (window.__selectedStation) {
+                setSelectedStation(window.__selectedStation);
+            }
+            if (window.__currentTime) {
+                setCurrentTime(window.__currentTime);
+            }
+        }, 100);
+
+        return () => clearInterval(interval);
     }, []);
 
-    // Filter alarms based on severity and acknowledgment
+    // Real-time clock fallback
     useEffect(() => {
-        let filtered = Array.isArray(alarms) ? [...alarms] : [];
+        const clockInterval = setInterval(() => {
+            setCurrentTime(prevTime => new Date(prevTime.getTime() + 1000));
+        }, 1000);
         
-        if (alarmFilter === 'critical') {
-            filtered = filtered.filter(alarm => alarm.severity === 'CRITICAL');
-        } else if (alarmFilter === 'high') {
-            filtered = filtered.filter(alarm => alarm.severity === 'HIGH');
-        } else if (alarmFilter === 'unacknowledged') {
-            filtered = filtered.filter(alarm => !alarm.acknowledged);
-        }
-        
-        // Sort by severity and timestamp
-        filtered.sort((a, b) => {
-            const severityOrder = { 'CRITICAL': 4, 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
-            const severityDiff = (severityOrder[b.severity] || 0) - (severityOrder[a.severity] || 0);
-            if (severityDiff !== 0) return severityDiff;
-            return new Date(b.timestamp) - new Date(a.timestamp);
-        });
-        
-        setFilteredAlarms(filtered);
-    }, [alarms, alarmFilter]);
+        return () => clearInterval(clockInterval);
+    }, []);
 
-    const addToCommandHistory = useCallback((command, type = 'MANUAL') => {
+    const addToCommandHistory = (command) => {
         const now = new Date();
-        const timeString = now.toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-        });
+        const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         
         setCommandHistory(prev => [
             { 
-                id: (prev[0]?.id || 0) + 1, 
+                id: prev.length ? prev[0].id + 1 : 1, 
                 time: timeString, 
                 command, 
-                user: type === 'SYSTEM' ? 'System' : 'Operator',
-                type,
-                station: selectedStation?.code || 'NGP'
+                user: 'Operator' 
             },
-            ...prev.slice(0, 49) // Keep last 50 commands
+            ...prev.slice(0, 19)
         ]);
-    }, [selectedStation]);
+        setLastAction(command);
+    };
 
-    const handleAcknowledge = useCallback((id) => {
-        const alarm = alarms.find(a => a.id === id);
-        if (alarm) {
-            onAcknowledgeAlarm?.(id);
-            addToCommandHistory(`Alarm ${id} acknowledged: ${alarm.type}`, 'ALARM');
+    const handleCommandSubmit = (e) => {
+        e.preventDefault();
+        if (newCommand.trim()) {
+            addToCommandHistory(`Manual Command: ${newCommand}`);
+            setNewCommand('');
         }
-    }, [alarms, onAcknowledgeAlarm, addToCommandHistory]);
+    };
 
-    const handlePointToggle = useCallback((id) => {
-        const point = points.find(p => p.id === id);
+    const handlePointToggle = (id) => {
+        if (!railwayData || !selectedStation) return;
+        
+        const point = filteredPoints.find(p => p.id === id);
         if (point && !point.locked && point.status === 'WORKING') {
             const newPosition = point.position === 'NORMAL' ? 'REVERSE' : 'NORMAL';
-            onPointChange?.(id);
-            addToCommandHistory(`Point ${id} set to ${newPosition}`, 'POINT');
+            
+            // Update data through viewer if available
+            if (window.__setRailwayData) {
+                window.__setRailwayData(prevData => {
+                    const newPoints = prevData.points.map(p => 
+                        p.id === id 
+                            ? { ...p, position: newPosition } 
+                            : p
+                    );
+                    return { ...prevData, points: newPoints };
+                });
+            }
+            
+            addToCommandHistory(`Point ${id} set to ${newPosition} at ${selectedStation?.name || 'Unknown Station'}`);
         }
-    }, [points, onPointChange, addToCommandHistory]);
+    };
 
-    const handleSignalChange = useCallback((id) => {
-        const signal = signals.find(s => s.id === id);
+    const handleSignalChange = (id) => {
+        if (!railwayData || !selectedStation) return;
+        
+        const signal = filteredSignals.find(s => s.id === id);
         if (signal) {
             let newStatus;
             if (signal.status === "RED") newStatus = "YELLOW";
             else if (signal.status === "YELLOW") newStatus = "GREEN";
             else newStatus = "RED";
             
-            onSignalChange?.(id);
-            addToCommandHistory(`Signal ${id} set to ${newStatus}`, 'SIGNAL');
-        }
-    }, [signals, onSignalChange, addToCommandHistory]);
-
-    const handleCommandSubmit = (e) => {
-        e.preventDefault();
-        if (newCommand.trim()) {
-            addToCommandHistory(newCommand, 'MANUAL');
-            setNewCommand('');
-        }
-    };
-
-    const handleRouteSet = (routeId, description) => {
-        addToCommandHistory(`Route ${routeId} set: ${description}`, 'ROUTE');
-    };
-
-    const getSeverityStyle = (severity) => {
-        switch (severity) {
-            case 'CRITICAL': 
-                return 'bg-red-900/80 border-red-500 text-red-100';
-            case 'HIGH': 
-                return 'bg-orange-900/80 border-orange-500 text-orange-100';
-            case 'MEDIUM': 
-                return 'bg-yellow-900/80 border-yellow-500 text-yellow-100';
-            case 'LOW': 
-                return 'bg-blue-900/80 border-blue-500 text-blue-100';
-            default: 
-                return 'bg-gray-900/80 border-gray-500 text-gray-100';
+            // Update data through viewer if available
+            if (window.__setRailwayData) {
+                window.__setRailwayData(prevData => {
+                    const newSignals = prevData.signals.map(s => {
+                        if (s.id === id) {
+                            return { ...s, status: newStatus };
+                        }
+                        return s;
+                    });
+                    return { ...prevData, signals: newSignals };
+                });
+            }
+            
+            addToCommandHistory(`Signal ${id} set to ${newStatus} at ${selectedStation?.name || 'Unknown Station'}`);
         }
     };
 
-    const getSystemStatusStyle = () => {
-        switch (systemStatus) {
-            case 'CRITICAL': 
-                return 'bg-red-500 animate-pulse';
-            case 'WARNING': 
-                return 'bg-yellow-500';
-            case 'MAINTENANCE': 
-                return 'bg-orange-500';
-            default: 
-                return 'bg-green-500';
+    // Filter points and signals based on selected station
+    const getFilteredPointsAndSignals = () => {
+        if (!selectedStation || !railwayData) {
+            return { filteredPoints: [], filteredSignals: [] };
         }
+
+        const stationCode = selectedStation.code;
+        
+        let filteredSignals = [];
+        let filteredPoints = [];
+
+        if (stationCode === 'NGP') {
+            // Show NGP signals (both with and without prefix)
+            filteredSignals = railwayData.signals.filter(signal => 
+                signal.stationCode === 'NGP' || 
+                (!signal.id.includes('_') && !signal.stationCode) // Legacy NGP signals
+            );
+            filteredPoints = railwayData.points.filter(point => 
+                point.stationCode === 'NGP' || 
+                (!point.id.includes('101') && !point.stationCode) // Legacy NGP points
+            );
+        } else {
+            // For other stations, filter by exact station code
+            filteredSignals = railwayData.signals.filter(signal => 
+                signal.stationCode === stationCode || 
+                signal.id.startsWith(stationCode + '_')
+            );
+            filteredPoints = railwayData.points.filter(point => 
+                point.stationCode === stationCode || 
+                point.id.startsWith(stationCode)
+            );
+        }
+
+        return { filteredPoints, filteredSignals };
     };
 
-    const formatSessionTime = (seconds) => {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    const { filteredPoints, filteredSignals } = getFilteredPointsAndSignals();
+
+    // Get station-specific train data
+    const getStationTrainData = () => {
+        if (!railwayData || !selectedStation) return [];
+        
+        return railwayData.active_trains.filter(train => 
+            selectedStation && (
+                train.position.station === selectedStation.code ||
+                (train.position.section && train.position.section.includes(selectedStation.code))
+            )
+        );
     };
 
-    const getActiveTrainsCount = () => {
-        return trainData?.filter(train => 
-            train.position?.station === selectedStation?.code ||
-            train.position?.section?.includes(selectedStation?.code)
-        ).length || 0;
-    };
+    const stationTrainData = getStationTrainData();
 
     return (
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-xl shadow-2xl border border-slate-600 h-full flex flex-col">
-            {/* Enhanced Header */}
-            <div className="p-4 border-b border-slate-700 bg-gradient-to-r from-slate-800 to-slate-700">
-                <div className="flex justify-between items-center mb-3">
-                    <div>
-                        <h2 className="text-xl font-bold text-yellow-400">Control Center</h2>
-                        <p className="text-sm text-slate-300">{selectedStation?.name || 'Central Control'}</p>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                        <div className="text-right">
-                            <div className="text-xs text-slate-400">System Status</div>
-                            <div className="flex items-center space-x-2">
-                                <div className={`w-3 h-3 rounded-full ${getSystemStatusStyle()}`}></div>
-                                <span className="text-sm font-bold text-white">{systemStatus}</span>
+        <div className="bg-gray-900 text-white min-h-screen font-sans">
+            
+
+            <main className="container mx-auto p-4">
+                <div className="max-w-7xl mx-auto">
+                    <div className="bg-[#0A1A30] rounded-lg border border-[#073f7c] overflow-hidden">
+                        <div className="bg-gradient-to-r from-red-600/20 via-purple-600/20 to-green-600/20 p-4 border-b border-white/10">
+                            <h2 className="text-xl font-bold text-[#FFA500] flex items-center">
+                                🎮 Railway Operations Control Panel
+                                <span className="ml-2 text-sm bg-red-500/20 px-2 py-1 rounded-full">LIVE OPERATIONS</span>
+                                <span className="ml-2 text-sm bg-orange-500/20 px-2 py-1 rounded-full">SIH 2024</span>
+                            </h2>
+                            <p className="text-sm text-gray-300 mt-1">
+                                {selectedStation 
+                                    ? `Operating ${filteredSignals.length} signals and ${filteredPoints.length} points at ${selectedStation.name}`
+                                    : 'Select a station from the viewer to begin operations'
+                                }
+                            </p>
+                            {lastAction && (
+                                <div className="mt-2 text-xs text-green-400">
+                                    Last Action: {lastAction}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-6">
+                            <div className="bg-[#0A1A30] rounded-lg shadow-lg border border-[#073f7c] h-full flex flex-col">
+                                <div className="p-4 border-b border-gray-700">
+                                    <div className="flex justify-between items-center">
+                                        <h2 className="text-lg font-semibold text-[#FFA500] flex items-center">
+                                            🎮 Railway Control Panel
+                                            <span className="ml-2 text-sm bg-green-500/20 px-2 py-1 rounded-full">AI Powered</span>
+                                        </h2>
+                                        <div className="flex space-x-2 items-center">
+                                            <span className="text-sm">System:</span>
+                                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                            <span className="text-sm font-mono text-green-400">OPERATIONAL</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex space-x-1 mt-4">
+                                        <button 
+                                            className={`px-4 py-2 rounded-t-md font-medium text-sm ${activeTab === 'controls' ? 'bg-gray-700 text-white' : 'bg-gray-800 text-gray-400'}`}
+                                            onClick={() => setActiveTab('controls')}
+                                        >
+                                            🎛️ Controls
+                                        </button>
+                                        <button 
+                                            className={`px-4 py-2 rounded-t-md font-medium text-sm ${activeTab === 'metrics' ? 'bg-gray-700 text-white' : 'bg-gray-800 text-gray-400'}`}
+                                            onClick={() => setActiveTab('metrics')}
+                                        >
+                                            📊 Metrics
+                                        </button>
+                                        <button 
+                                            className={`px-4 py-2 rounded-t-md font-medium text-sm ${activeTab === 'logs' ? 'bg-gray-700 text-white' : 'bg-gray-800 text-gray-400'}`}
+                                            onClick={() => setActiveTab('logs')}
+                                        >
+                                            📋 Logs
+                                        </button>
+                                        <button 
+                                            className={`px-4 py-2 rounded-t-md font-medium text-sm ${activeTab === 'emergency' ? 'bg-gray-700 text-white' : 'bg-gray-800 text-gray-400'}`}
+                                            onClick={() => setActiveTab('emergency')}
+                                        >
+                                            🚨 Emergency
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="flex-grow overflow-auto">
+                                    <AnimatePresence mode="wait">
+                                        {activeTab === 'controls' && (
+                                            <motion.div
+                                                key="controls"
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                className="p-4"
+                                            >
+                                                {!selectedStation ? (
+                                                    <div className="text-center py-12">
+                                                        <div className="text-gray-400 text-2xl mb-4">🏗️ No Station Selected</div>
+                                                        <div className="text-gray-500 text-lg mb-4">Please select a station from the Railway Viewer to begin operations</div>
+                                                        <div className="bg-blue-600/20 border border-blue-500 rounded-lg p-4 max-w-md mx-auto">
+                                                            <div className="text-blue-300 text-sm">
+                                                                <div className="font-bold mb-2">How to get started:</div>
+                                                                <div>1. Open Railway Viewer in another tab</div>
+                                                                <div>2. Select any station from the route</div>
+                                                                <div>3. Return to this control panel</div>
+                                                                <div>4. Begin operating signals and points</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <div className="mb-6">
+                                                            <h3 className="font-semibold mb-3 flex items-center">
+                                                                🔧 Points Control - {selectedStation.name}
+                                                                <span className="ml-2 text-xs bg-blue-500/20 px-2 py-1 rounded-full">
+                                                                    {filteredPoints.length} Points Available
+                                                                </span>
+                                                            </h3>
+                                                            {filteredPoints.length > 0 ? (
+                                                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                                                                    {filteredPoints.map(point => (
+                                                                        <div 
+                                                                            key={point.id}
+                                                                            onClick={() => handlePointToggle(point.id)}
+                                                                            className={`p-4 rounded-lg border cursor-pointer transition-all transform hover:scale-105 ${
+                                                                                point.locked ? 'bg-gray-800 border-gray-700 cursor-not-allowed' :
+                                                                                point.status !== 'WORKING' ? 'bg-orange-900 border-orange-700' :
+                                                                                'bg-blue-900 border-blue-700 hover:bg-blue-800 hover:shadow-lg'
+                                                                            }`}
+                                                                        >
+                                                                            <div className="flex justify-between items-center mb-2">
+                                                                                <span className="font-bold text-lg">{point.id}</span>
+                                                                                <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                                                                    point.locked ? 'bg-yellow-600' : 
+                                                                                    point.status === 'MAINTENANCE' ? 'bg-orange-600' : 
+                                                                                    'bg-green-600'
+                                                                                }`}>
+                                                                                    {point.locked ? 'LOCKED' : point.status}
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex items-center mt-2">
+                                                                                <div className={`h-2 flex-1 rounded-l ${
+                                                                                    point.position === 'NORMAL' ? 'bg-blue-400' : 'bg-gray-600'
+                                                                                }`}></div>
+                                                                                <div className="mx-2 text-sm font-bold">
+                                                                                    {point.position}
+                                                                                </div>
+                                                                                <div className={`h-2 flex-1 rounded-r ${
+                                                                                    point.position === 'REVERSE' ? 'bg-blue-400' : 'bg-gray-600'
+                                                                                }`}></div>
+                                                                            </div>
+                                                                            {!point.locked && point.status === 'WORKING' && (
+                                                                                <div className="text-xs text-center mt-2 text-blue-300">
+                                                                                    Click to toggle position
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            ) : (
+                                                                <div className="text-center py-6 text-gray-500 bg-gray-800 rounded-lg">
+                                                                    No points available for {selectedStation.name}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        <div className="mb-6">
+                                                            <h3 className="font-semibold mb-3 flex items-center">
+                                                                🚦 Signal Control - {selectedStation.name}
+                                                                <span className="ml-2 text-xs bg-red-500/20 px-2 py-1 rounded-full">
+                                                                    {filteredSignals.length} Signals Available
+                                                                </span>
+                                                            </h3>
+                                                            {filteredSignals.length > 0 ? (
+                                                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                                                                    {filteredSignals.map(signal => (
+                                                                        <div 
+                                                                            key={signal.id}
+                                                                            onClick={() => handleSignalChange(signal.id)}
+                                                                            className="p-4 rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 cursor-pointer transition-all transform hover:scale-105 hover:shadow-lg"
+                                                                        >
+                                                                            <div className="flex justify-between items-center mb-3">
+                                                                                <span className="font-bold text-lg">{signal.id}</span>
+                                                                                <span className="text-xs opacity-75 bg-gray-700 px-2 py-1 rounded">{signal.type}</span>
+                                                                            </div>
+                                                                            <div className="flex items-center justify-center space-x-3">
+                                                                                <div className={`w-6 h-6 rounded-full border-2 ${
+                                                                                    signal.status === 'RED' ? 'bg-red-600 border-white shadow-lg' : 'bg-red-900 border-gray-600'
+                                                                                }`}></div>
+                                                                                <div className={`w-6 h-6 rounded-full border-2 ${
+                                                                                    signal.status === 'YELLOW' ? 'bg-yellow-500 border-white shadow-lg' : 'bg-yellow-900 border-gray-600'
+                                                                                }`}></div>
+                                                                                <div className={`w-6 h-6 rounded-full border-2 ${
+                                                                                    signal.status === 'GREEN' ? 'bg-green-500 border-white shadow-lg' : 'bg-green-900 border-gray-600'
+                                                                                }`}></div>
+                                                                            </div>
+                                                                            <div className="text-center mt-2 text-sm font-bold">
+                                                                                Current: <span className={`
+                                                                                    ${signal.status === 'RED' ? 'text-red-400' : 
+                                                                                      signal.status === 'YELLOW' ? 'text-yellow-400' : 'text-green-400'}
+                                                                                `}>{signal.status}</span>
+                                                                            </div>
+                                                                            <div className="text-xs text-center mt-1 text-gray-400">
+                                                                                Click to change
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            ) : (
+                                                                <div className="text-center py-6 text-gray-500 bg-gray-800 rounded-lg">
+                                                                    No signals available for {selectedStation.name}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        <div>
+                                                            <h3 className="font-semibold mb-3 flex items-center">
+                                                                🛤️ Route Setting - {selectedStation.name}
+                                                                <span className="ml-2 text-xs bg-purple-500/20 px-2 py-1 rounded-full">AI Optimized</span>
+                                                            </h3>
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                <div className="p-4 rounded-lg bg-gray-800 border border-gray-700 hover:bg-gray-750 transition-colors">
+                                                                    <div className="flex justify-between items-center">
+                                                                        <span className="font-medium">Route R1: Auto Platform Assignment</span>
+                                                                        <button 
+                                                                            onClick={() => addToCommandHistory(`Auto route set for ${selectedStation.name}`)}
+                                                                            className="px-3 py-1 bg-green-700 hover:bg-green-600 rounded text-sm transition-colors"
+                                                                        >
+                                                                            Auto Set
+                                                                        </button>
+                                                                    </div>
+                                                                    <div className="text-xs text-gray-400 mt-1">AI will optimize platform allocation</div>
+                                                                </div>
+                                                                <div className="p-4 rounded-lg bg-yellow-900 border border-yellow-700">
+                                                                    <div className="flex justify-between items-center">
+                                                                        <span className="font-medium">Route R2: Emergency Override</span>
+                                                                        <button className="px-3 py-1 bg-gray-700 rounded text-sm cursor-not-allowed" disabled>
+                                                                            Locked
+                                                                        </button>
+                                                                    </div>
+                                                                    <div className="text-xs text-yellow-400 mt-1">Requires supervisor authorization</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </motion.div>
+                                        )}
+
+                                        {activeTab === 'metrics' && (
+                                            <motion.div
+                                                key="metrics"
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                className="p-4"
+                                            >
+                                                <h3 className="font-semibold mb-4 flex items-center">
+                                                    📈 {selectedStation ? `${selectedStation.name} Performance` : 'System Performance'} Metrics
+                                                    <span className="ml-2 text-xs bg-green-500/20 px-2 py-1 rounded-full">Real-time</span>
+                                                </h3>
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                                    <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 p-4 rounded-lg border border-blue-500/30">
+                                                        <div className="text-sm text-blue-300 mb-1">Station Trains</div>
+                                                        <div className="text-3xl font-bold text-blue-400">{stationTrainData.length}</div>
+                                                        <div className="text-xs text-blue-300">Currently at station</div>
+                                                    </div>
+                                                    
+                                                    <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 p-4 rounded-lg border border-green-500/30">
+                                                        <div className="text-sm text-green-300 mb-1">Active Signals</div>
+                                                        <div className="text-3xl font-bold text-green-400">{filteredSignals.length}</div>
+                                                        <div className="text-xs text-green-300">Under your control</div>
+                                                    </div>
+                                                    
+                                                    <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-800/20 p-4 rounded-lg border border-yellow-500/30">
+                                                        <div className="text-sm text-yellow-300 mb-1">Active Points</div>
+                                                        <div className="text-3xl font-bold text-yellow-400">{filteredPoints.length}</div>
+                                                        <div className="text-xs text-yellow-300">Available for operation</div>
+                                                    </div>
+                                                    
+                                                    <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 p-4 rounded-lg border border-purple-500/30">
+                                                        <div className="text-sm text-purple-300 mb-1">Station Status</div>
+                                                        <div className="text-2xl font-bold text-purple-400">OPERATIONAL</div>
+                                                        <div className="text-xs text-purple-300">All systems normal</div>
+                                                    </div>
+                                                </div>
+
+                                                {stationTrainData.length > 0 && (
+                                                    <div className="mt-6">
+                                                        <h4 className="font-semibold mb-3 flex items-center">
+                                                            🚄 {selectedStation?.name} Train Status
+                                                        </h4>
+                                                        <div className="space-y-3 max-h-80 overflow-y-auto">
+                                                            {stationTrainData.map((train, idx) => (
+                                                                <div key={train.id || idx} className="bg-gray-800 p-4 rounded-lg border border-gray-700 hover:bg-gray-750 transition-colors">
+                                                                    <div className="flex justify-between items-center mb-2">
+                                                                        <span className="font-bold text-lg">{train.id}</span>
+                                                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                                                            train.status === 'RUNNING' ? 'bg-green-600' :
+                                                                            train.status === 'STOPPED' ? 'bg-red-600' :
+                                                                            'bg-yellow-600'
+                                                                        }`}>
+                                                                            {train.status || 'UNKNOWN'}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="text-sm text-gray-300 mb-1">{train.name}</div>
+                                                                    <div className="text-xs text-gray-400">
+                                                                        Speed: {train.speed || 0} km/h | 
+                                                                        {train.position?.station && ` Station: ${train.position.station}`}
+                                                                        {train.position?.platform && ` | Platform: ${train.position.platform}`}
+                                                                        {train.position?.section && ` Section: ${train.position.section}`}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </motion.div>
+                                        )}
+
+                                        {activeTab === 'logs' && (
+                                            <motion.div
+                                                key="logs"
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                className="p-4"
+                                            >
+                                                <div className="mb-4">
+                                                    <h3 className="font-semibold flex items-center mb-3">
+                                                        📜 Command History & System Logs
+                                                        <span className="ml-2 text-xs bg-blue-500/20 px-2 py-1 rounded-full">Live Log</span>
+                                                    </h3>
+                                                    <div className="bg-black bg-opacity-50 rounded-lg p-4 font-mono text-sm h-[400px] overflow-y-auto border border-gray-700">
+                                                        {commandHistory.map(cmd => (
+                                                            <div key={cmd.id} className="mb-2 border-b border-gray-800 pb-2 hover:bg-gray-800/30 px-2 py-1 rounded">
+                                                                <span className="text-gray-500">[{cmd.time}]</span> 
+                                                                <span className={`font-semibold ${cmd.user === 'System' ? 'text-yellow-400' : 'text-blue-400'}`}> {cmd.user}:</span> 
+                                                                <span className="text-green-400"> {cmd.command}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                
+                                                <div>
+                                                    <h3 className="font-semibold mb-3">💻 Manual Command Input</h3>
+                                                    <form onSubmit={handleCommandSubmit} className="flex gap-2">
+                                                        <input
+                                                            type="text"
+                                                            value={newCommand}
+                                                            onChange={(e) => setNewCommand(e.target.value)}
+                                                            className="flex-grow bg-gray-800 border border-gray-700 rounded px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
+                                                            placeholder="Type command... (e.g., 'set signal H1 to green', 'lock point P101A')"
+                                                        />
+                                                        <button 
+                                                            type="submit"
+                                                            className="bg-blue-700 hover:bg-blue-600 px-6 py-3 rounded text-sm font-medium transition-colors"
+                                                        >
+                                                            Execute
+                                                        </button>
+                                                    </form>
+                                                    <div className="text-xs text-gray-400 mt-2">
+                                                        Manual commands are logged and can override automatic systems. Use with caution.
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+
+                                        {activeTab === 'emergency' && (
+                                            <motion.div
+                                                key="emergency"
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                className="p-4"
+                                            >
+                                                <div className="bg-red-900/20 border border-red-500 rounded-lg p-6 mb-6">
+                                                    <h3 className="font-bold text-red-400 text-xl mb-4 flex items-center">
+                                                        🚨 Emergency Control Panel
+                                                        <span className="ml-2 text-xs bg-red-500/20 px-2 py-1 rounded-full">CRITICAL OPERATIONS</span>
+                                                    </h3>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <button 
+                                                            onClick={() => addToCommandHistory(`EMERGENCY: All signals set to RED at ${selectedStation?.name || 'system-wide'}`)}
+                                                            className="bg-red-700 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-lg transition-colors border-2 border-red-500"
+                                                        >
+                                                            🛑 EMERGENCY STOP ALL SIGNALS
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => addToCommandHistory(`EMERGENCY: All points locked at ${selectedStation?.name || 'system-wide'}`)}
+                                                            className="bg-yellow-700 hover:bg-yellow-600 text-white font-bold py-4 px-6 rounded-lg transition-colors border-2 border-yellow-500"
+                                                        >
+                                                            🔒 LOCK ALL POINTS
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => addToCommandHistory(`EMERGENCY: Station isolation activated for ${selectedStation?.name || 'unknown station'}`)}
+                                                            className="bg-orange-700 hover:bg-orange-600 text-white font-bold py-4 px-6 rounded-lg transition-colors border-2 border-orange-500"
+                                                        >
+                                                            ⚠️ ISOLATE STATION
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => addToCommandHistory(`EMERGENCY: Supervisor notification sent`)}
+                                                            className="bg-blue-700 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-lg transition-colors border-2 border-blue-500"
+                                                        >
+                                                            📞 CALL SUPERVISOR
+                                                        </button>
+                                                    </div>
+                                                    <div className="mt-4 text-sm text-red-300">
+                                                        <strong>WARNING:</strong> Emergency controls will immediately affect train operations. 
+                                                        Use only in critical situations. All emergency actions are logged and monitored.
+                                                    </div>
+                                                </div>
+
+                                                                                               <div className="bg-gray-800 rounded-lg p-4">
+                                                    <h4 className="font-semibold text-lg mb-3">Emergency Protocols</h4>
+                                                    <ul className="list-disc list-inside text-gray-400 space-y-2">
+                                                        <li><strong>EMERGENCY STOP:</strong> Immediately sets all signals in the selected station to RED.</li>
+                                                        <li><strong>LOCK ALL POINTS:</strong> Prevents any changes to point positions, securing current routes.</li>
+                                                        <li><strong>ISOLATE STATION:</strong> Prevents trains from entering or leaving the station perimeter.</li>
+                                                        <li><strong>CALL SUPERVISOR:</strong> Sends an alert to the supervising authority for immediate assistance.</li>
+                                                    </ul>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                                <div className="p-4 border-t border-gray-700">
+                                    <div className="flex justify-between items-center text-xs text-gray-400">
+                                        <div>
+                                            <div className="flex items-center">
+                                                <span className="w-2 h-2 bg-green-400 rounded-full mr-1 animate-pulse"></span>
+                                                Connected to Railway Data Stream
+                                            </div>
+                                            <div>Operator ID: CR-OP-2025-NGP</div>
+                                            <div>User: Bharat27-d</div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div>Last update: {currentTime?.toLocaleTimeString() || '18:40:09'}</div>
+                                            <div>Session time: 01:24:35</div>
+                                            <div>Sync Status: Synced with Viewer</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </main>
 
-                {/* Enhanced Tab Navigation */}
-                <div className="flex space-x-1">
-                    {[
-                        { id: 'alarms', label: 'Alarms', count: alarms.filter(a => !a.acknowledged).length },
-                        { id: 'controls', label: 'Controls', count: null },
-                        { id: 'logs', label: 'Logs', count: commandHistory.length },
-                        { id: 'analytics', label: 'Analytics', count: null }
-                    ].map(tab => (
-                        <button 
-                            key={tab.id}
-                            className={`px-4 py-2 rounded-t-lg font-medium text-sm transition-all ${
-                                activeTab === tab.id 
-                                    ? 'bg-slate-700 text-white border-b-2 border-yellow-400' 
-                                    : 'bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-700/50'
-                            }`}
-                            onClick={() => setActiveTab(tab.id)}
-                        >
-                            {tab.label}
-                            {tab.count !== null && tab.count > 0 && (
-                                <span className="ml-2 px-2 py-0.5 bg-red-600 text-white rounded-full text-xs">
-                                    {tab.count}
-                                </span>
-                            )}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Tab Content */}
-            <div className="flex-grow overflow-hidden">
-                <AnimatePresence mode="wait">
-                    {activeTab === 'alarms' && (
-                        <motion.div
-                            key="alarms"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="p-4 h-full overflow-auto"
-                        >
-                            {/* Alarm Filters */}
-                            <div className="mb-4 flex justify-between items-center">
-                                <h3 className="font-semibold text-white">Active Alarms</h3>
-                                <div className="flex space-x-2">
-                                    {[
-                                        { id: 'all', label: 'All' },
-                                        { id: 'unacknowledged', label: 'Active' },
-                                        { id: 'critical', label: 'Critical' },
-                                        { id: 'high', label: 'High' }
-                                    ].map(filter => (
-                                        <button 
-                                            key={filter.id}
-                                            onClick={() => setAlarmFilter(filter.id)}
-                                            className={`px-3 py-1 text-xs rounded transition-all ${
-                                                alarmFilter === filter.id
-                                                    ? 'bg-yellow-600 text-white'
-                                                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                                            }`}
-                                        >
-                                            {filter.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            {/* Alarms List */}
-                            <div className="space-y-3">
-                                {filteredAlarms.length > 0 ? (
-                                    filteredAlarms.map((alarm) => (
-                                        <motion.div 
-                                            key={alarm.id}
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            className={`p-4 rounded-lg border-l-4 ${getSeverityStyle(alarm.severity)} ${
-                                                alarm.acknowledged ? 'opacity-60' : ''
-                                            }`}
-                                        >
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center mb-1">
-                                                        {!alarm.acknowledged && (
-                                                            <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse mr-2"></div>
-                                                        )}
-                                                        <span className="font-bold text-sm">
-                                                            [{alarm.type.replace('_', ' ')}]
-                                                        </span>
-                                                        <span className="ml-2 text-xs bg-slate-700 px-2 py-1 rounded">
-                                                            {alarm.location}
-                                                        </span>
-                                                    </div>
-                                                    <div className="text-sm mb-1">{alarm.message}</div>
-                                                    <div className="text-xs opacity-75">
-                                                        {new Date(alarm.timestamp).toLocaleString()}
-                                                    </div>
-                                                </div>
-                                                <div className="flex flex-col space-y-1">
-                                                    <button 
-                                                        className="text-xs underline hover:no-underline"
-                                                        onClick={() => setExpandedAlarm(
-                                                            expandedAlarm === alarm.id ? null : alarm.id
-                                                        )}
-                                                    >
-                                                        {expandedAlarm === alarm.id ? 'Hide' : 'Details'}
-                                                    </button>
-                                                    {!alarm.acknowledged && (
-                                                        <button 
-                                                            onClick={() => handleAcknowledge(alarm.id)}
-                                                            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs transition-colors"
-                                                        >
-                                                            ACK
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            
-                                            {expandedAlarm === alarm.id && (
-                                                <motion.div 
-                                                    initial={{ opacity: 0, height: 0 }}
-                                                    animate={{ opacity: 1, height: 'auto' }}
-                                                    className="mt-3 pt-3 border-t border-slate-600 text-sm"
-                                                >
-                                                    <div className="grid grid-cols-2 gap-2 text-xs">
-                                                        <div><strong>Severity:</strong> {alarm.severity}</div>
-                                                        <div><strong>Type:</strong> {alarm.type}</div>
-                                                        <div><strong>Location:</strong> {alarm.location}</div>
-                                                        <div><strong>Status:</strong> {alarm.acknowledged ? 'Acknowledged' : 'Active'}</div>
-                                                    </div>
-                                                </motion.div>
-                                            )}
-                                        </motion.div>
-                                    ))
-                                ) : (
-                                    <div className="text-center py-12">
-                                        <div className="text-green-400 text-4xl mb-2">✓</div>
-                                        <div className="text-slate-400">No alarms matching filter</div>
-                                    </div>
-                                )}
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'controls' && (
-                        <motion.div
-                            key="controls"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="p-4 h-full overflow-auto"
-                        >
-                            {/* Points Control */}
-                            <div className="mb-6">
-                                <h3 className="font-semibold mb-3 text-white">Points Control</h3>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {points.filter(point => 
-                                        !selectedStation || 
-                                        point.id.startsWith(selectedStation.code) || 
-                                        point.id.startsWith('P10')
-                                    ).map(point => (
-                                        <motion.div 
-                                            key={point.id}
-                                            whileHover={{ scale: 1.02 }}
-                                            whileTap={{ scale: 0.98 }}
-                                            onClick={() => handlePointToggle(point.id)}
-                                            className={`p-3 rounded-lg border-2 transition-all cursor-pointer ${
-                                                point.locked 
-                                                    ? 'bg-gray-800/50 border-gray-600 cursor-not-allowed' :
-                                                point.status !== 'WORKING' 
-                                                    ? 'bg-orange-900/50 border-orange-600' :
-                                                    'bg-blue-900/50 border-blue-600 hover:bg-blue-800/50'
-                                            }`}
-                                        >
-                                            <div className="flex justify-between items-center mb-2">
-                                                <span className="font-medium text-white">{point.id}</span>
-                                                <div className={`px-2 py-1 rounded text-xs font-bold ${
-                                                    point.locked ? 'bg-yellow-600 text-white' : 
-                                                    point.status === 'MAINTENANCE' ? 'bg-orange-600 text-white' : 
-                                                    'bg-green-600 text-white'
-                                                }`}>
-                                                    {point.locked ? 'LOCKED' : point.status}
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center justify-between">
-                                                <div className={`h-2 w-16 rounded ${
-                                                    point.position === 'NORMAL' ? 'bg-blue-400' : 'bg-gray-600'
-                                                }`}></div>
-                                                <div className="mx-2 text-xs font-bold text-white">
-                                                    {point.position}
-                                                </div>
-                                                <div className={`h-2 w-16 rounded ${
-                                                    point.position === 'REVERSE' ? 'bg-blue-400' : 'bg-gray-600'
-                                                }`}></div>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            {/* Signal Control */}
-                            <div className="mb-6">
-                                <h3 className="font-semibold mb-3 text-white">Signal Control</h3>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {signals.filter(signal => 
-                                        !selectedStation || 
-                                        signal.id.startsWith(selectedStation.code) || 
-                                        ['H1', 'H2', 'S1', 'S2', 'S3', 'S4', 'S8'].includes(signal.id)
-                                    ).map(signal => (
-                                        <motion.div 
-                                            key={signal.id}
-                                            whileHover={{ scale: 1.02 }}
-                                            whileTap={{ scale: 0.98 }}
-                                            onClick={() => handleSignalChange(signal.id)}
-                                            className="p-3 rounded-lg border-2 border-slate-600 bg-slate-800/50 hover:bg-slate-700/50 cursor-pointer transition-all"
-                                        >
-                                            <div className="flex justify-between items-center mb-2">
-                                                <div>
-                                                    <span className="font-medium text-white">{signal.id}</span>
-                                                    <div className="text-xs text-slate-400">{signal.type}</div>
-                                                </div>
-                                                <div className="text-xs text-slate-400">{signal.route}</div>
-                                            </div>
-                                            <div className="flex items-center justify-center space-x-2">
-                                                <div className={`w-4 h-4 rounded-full border-2 border-white ${
-                                                    signal.status === 'RED' ? 'bg-red-600 shadow-lg shadow-red-600/50' : 'bg-red-900'
-                                                }`}></div>
-                                                <div className={`w-4 h-4 rounded-full border-2 border-white ${
-                                                    signal.status === 'YELLOW' ? 'bg-yellow-500 shadow-lg shadow-yellow-500/50' : 'bg-yellow-900'
-                                                }`}></div>
-                                                <div className={`w-4 h-4 rounded-full border-2 border-white ${
-                                                    signal.status === 'GREEN' ? 'bg-green-500 shadow-lg shadow-green-500/50' : 'bg-green-900'
-                                                }`}></div>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            {/* Route Setting */}
-                            <div>
-                                <h3 className="font-semibold mb-3 text-white">Route Management</h3>
-                                <div className="space-y-2">
-                                    {[
-                                        { id: 'R1', from: 'AJNI', to: 'NGP-P1', status: 'AVAILABLE' },
-                                        { id: 'R2', from: 'AJNI', to: 'NGP-P2', status: 'LOCKED' },
-                                        { id: 'R3', from: 'NGP-P1', to: 'GONDIA', status: 'AVAILABLE' },
-                                        { id: 'R4', from: 'NGP-P8', to: 'GONDIA', status: 'SET' }
-                                    ].map(route => (
-                                        <div key={route.id} className={`p-3 rounded-lg border ${
-                                            route.status === 'LOCKED' 
-                                                ? 'bg-yellow-900/30 border-yellow-600' :
-                                            route.status === 'SET'
-                                                ? 'bg-green-900/30 border-green-600' :
-                                                'bg-slate-800/50 border-slate-600'
-                                        }`}>
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <span className="font-medium text-white">
-                                                        Route {route.id}: {route.from} → {route.to}
-                                                    </span>
-                                                    <div className="text-xs text-slate-400">Status: {route.status}</div>
-                                                </div>
-                                                <button 
-                                                    onClick={() => handleRouteSet(route.id, `${route.from} → ${route.to}`)}
-                                                    disabled={route.status === 'LOCKED'}
-                                                    className={`px-3 py-1 rounded text-xs transition-colors ${
-                                                        route.status === 'LOCKED'
-                                                            ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                                            : 'bg-green-600 hover:bg-green-700 text-white'
-                                                    }`}
-                                                >
-                                                    {route.status === 'SET' ? 'Clear' : 'Set Route'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'logs' && (
-                        <motion.div
-                            key="logs"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="p-4 h-full flex flex-col"
-                        >
-                            {/* Command History */}
-                            <div className="flex-1 mb-4">
-                                <h3 className="font-semibold mb-3 text-white">Command History</h3>
-                                <div className="bg-black/40 rounded-lg p-3 font-mono text-sm h-64 overflow-y-auto border border-slate-600">
-                                    {commandHistory.map(cmd => (
-                                        <motion.div 
-                                            key={cmd.id} 
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            className="mb-2 pb-2 border-b border-slate-800 last:border-b-0"
-                                        >
-                                            <div className="flex items-center space-x-2 text-xs">
-                                                <span className="text-slate-500">[{cmd.time}]</span>
-                                                <span className={`px-2 py-0.5 rounded text-xs ${
-                                                    cmd.type === 'SYSTEM' ? 'bg-blue-900 text-blue-200' :
-                                                    cmd.type === 'ALARM' ? 'bg-red-900 text-red-200' :
-                                                    cmd.type === 'SIGNAL' ? 'bg-yellow-900 text-yellow-200' :
-                                                    cmd.type === 'POINT' ? 'bg-green-900 text-green-200' :
-                                                    'bg-slate-700 text-slate-300'
-                                                }`}>
-                                                    {cmd.type}
-                                                </span>
-                                                <span className="text-blue-400">{cmd.user}:</span>
-                                                {cmd.station && (
-                                                    <span className="text-purple-400">[{cmd.station}]</span>
-                                                )}
-                                            </div>
-                                            <div className="text-green-400 mt-1">{cmd.command}</div>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            {/* Command Input */}
-                            <div>
-                                <h3 className="font-semibold mb-2 text-white">Manual Command Input</h3>
-                                <form onSubmit={handleCommandSubmit} className="flex">
-                                    <input
-                                        type="text"
-                                        value={newCommand}
-                                        onChange={(e) => setNewCommand(e.target.value)}
-                                        className="flex-grow bg-slate-800 border border-slate-600 rounded-l px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-yellow-400"
-                                        placeholder="Enter command..."
-                                    />
-                                    <button 
-                                        type="submit"
-                                        className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-r text-sm text-white transition-colors"
-                                    >
-                                        Execute
-                                    </button>
-                                </form>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'analytics' && (
-                        <motion.div
-                            key="analytics"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="p-4 h-full overflow-auto"
-                        >
-                            <h3 className="font-semibold mb-4 text-white">System Analytics</h3>
-                            
-                            {/* Quick Stats */}
-                            <div className="grid grid-cols-2 gap-4 mb-6">
-                                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-600">
-                                    <div className="text-2xl font-bold text-green-400">{getActiveTrainsCount()}</div>
-                                    <div className="text-sm text-slate-300">Active Trains</div>
-                                </div>
-                                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-600">
-                                    <div className="text-2xl font-bold text-blue-400">{points.length}</div>
-                                    <div className="text-sm text-slate-300">Total Points</div>
-                                </div>
-                                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-600">
-                                    <div className="text-2xl font-bold text-yellow-400">{signals.length}</div>
-                                    <div className="text-sm text-slate-300">Total Signals</div>
-                                </div>
-                                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-600">
-                                    <div className="text-2xl font-bold text-red-400">
-                                        {alarms.filter(a => !a.acknowledged).length}
-                                    </div>
-                                    <div className="text-sm text-slate-300">Active Alarms</div>
-                                </div>
-                            </div>
-
-                            {/* Signal Status Distribution */}
-                            <div className="mb-6">
-                                <h4 className="font-medium mb-3 text-white">Signal Status Distribution</h4>
-                                <div className="space-y-2">
-                                    {['RED', 'YELLOW', 'GREEN'].map(status => {
-                                        const count = signals.filter(s => s.status === status).length;
-                                        const percentage = signals.length > 0 ? (count / signals.length) * 100 : 0;
-                                        return (
-                                            <div key={status} className="flex items-center space-x-3">
-                                                <div className={`w-4 h-4 rounded ${
-                                                    status === 'RED' ? 'bg-red-500' :
-                                                    status === 'YELLOW' ? 'bg-yellow-500' :
-                                                    'bg-green-500'
-                                                }`}></div>
-                                                <span className="text-sm text-white w-16">{status}</span>
-                                                <div className="flex-1 bg-slate-700 rounded-full h-2">
-                                                    <div 
-                                                        className={`h-2 rounded-full ${
-                                                            status === 'RED' ? 'bg-red-500' :
-                                                            status === 'YELLOW' ? 'bg-yellow-500' :
-                                                            'bg-green-500'
-                                                        }`}
-                                                        style={{ width: `${percentage}%` }}
-                                                    ></div>
-                                                </div>
-                                                <span className="text-sm text-slate-300 w-12">{count}</span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            {/* Point Status */}
-                            <div>
-                                <h4 className="font-medium mb-3 text-white">Point Status</h4>
-                                <div className="space-y-2">
-                                    {['WORKING', 'MAINTENANCE', 'LOCKED'].map(status => {
-                                        const count = status === 'LOCKED' 
-                                            ? points.filter(p => p.locked).length
-                                            : points.filter(p => p.status === status).length;
-                                        return (
-                                            <div key={status} className="flex justify-between items-center p-2 bg-slate-800/30 rounded">
-                                                <span className="text-sm text-white">{status}</span>
-                                                <span className={`text-sm font-bold ${
-                                                    status === 'WORKING' ? 'text-green-400' :
-                                                    status === 'MAINTENANCE' ? 'text-yellow-400' :
-                                                    'text-red-400'
-                                                }`}>
-                                                    {count}
-                                                </span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
-
-            {/* Enhanced Footer */}
-            <div className="p-4 border-t border-slate-700 bg-slate-800/30">
-                <div className="grid grid-cols-2 gap-4 text-xs text-slate-400">
-                    <div>
-                        <div className="font-medium text-slate-300">Connection Status</div>
-                        <div>✓ Connected: {selectedStation?.name || 'Central'} Control</div>
-                        <div>Operator: {operatorId}</div>
+            <footer className="mt-12 bg-gradient-to-r from-slate-800 to-red-800 p-6 border-t border-white/20">
+                <div className="max-w-7xl mx-auto text-center">
+                    <div className="text-white/80">
+                        🇮🇳 <strong>SignalSense AI Control Center</strong> - Empowering Railway Operators with AI 🇮🇳
                     </div>
-                    <div className="text-right">
-                        <div className="font-medium text-slate-300">Session Info</div>
-                        <div>Last update: {currentTime?.toLocaleTimeString() || new Date().toLocaleTimeString()}</div>
-                        <div>Session time: {formatSessionTime(sessionTime)}</div>
+                    <div className="text-xs text-white/60 mt-2">
+                        © 2024 Team Excellence • Smart India Hackathon • All Rights Reserved
                     </div>
                 </div>
-            </div>
+            </footer>
         </div>
     );
 };
