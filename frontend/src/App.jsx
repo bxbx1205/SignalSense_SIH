@@ -1,5 +1,6 @@
 import './App.css'
-import Control from './components/control.jsx'
+import TrainControlViewer from './components/TrainControlViewer.jsx'
+import TrainControlOperator from './components/TrainControlOperator.jsx'
 
 
 function App() {
@@ -7,7 +8,9 @@ function App() {
 
   return (
     <>
-     <Control />
+     <TrainControlViewer />
+     <p>alag</p>
+     <TrainControlOperator />
     </>
   )
 }

@@ -1,0 +1,142 @@
+/* TrainControl.css */
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.pulse-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.ping-dot {
+  position: relative;
+}
+
+.ping-dot:before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: inherit;
+  opacity: 0.6;
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  z-index: -1;
+}
+
+/* Track layout styling */
+.track {
+  stroke: #00BFFF;
+  stroke-width: 3;
+  fill: none;
+}
+
+.track-occupied {
+  stroke: #ff5252;
+}
+
+.point-switch {
+  transition: d 0.3s;
+}
+
+.platform {
+  fill: rgba(50, 205, 50, 0.3);
+  stroke: #32CD32;
+  stroke-width: 1;
+}
+
+/* Command terminal styling */
+.terminal {
+  background-color: #000;
+  font-family: 'Consolas', 'Monaco', monospace;
+  color: #eee;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+.terminal-input {
+  background-color: transparent;
+  border: none;
+  color: #eee;
+  font-family: 'Consolas', 'Monaco', monospace;
+  width: 100%;
+  outline: none;
+}
+
+/* Dashboard elements */
+.dash-panel {
+  background-color: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(8px);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+.control-button {
+  transition: all 0.2s;
+}
+
+.control-button:active {
+  transform: translateY(1px);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.8);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8);
+}
+
+/* Glowing elements */
+.glow-alert {
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
+}
+
+.glow-success {
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
+}
+
+.animate-ping {
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Signal indicators */
+.signal-red {
+  background-color: #ef4444;
+  box-shadow: 0 0 5px rgba(239, 68, 68, 0.7);
+}
+
+.signal-yellow {
+  background-color: #facc15;
+  box-shadow: 0 0 5px rgba(250, 204, 21, 0.7);
+}
+
+.signal-green {
+  background-color: #22c55e;
+  box-shadow: 0 0 5px rgba(34, 197, 94, 0.7);
+}
