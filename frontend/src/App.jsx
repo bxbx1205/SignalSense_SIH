@@ -1,6 +1,6 @@
 import './App.css'
-import TrainControlViewer from './components/TrainControlViewer.jsx'
-import TrainControlOperator from './components/TrainControlOperator.jsx'
+import TrainControlViewer from './components/Controllers/TrainControlViewer.jsx'
+import TrainControlOperator from './components/Controllers/TrainControlOperator.jsx'
 
 
 function App() {
