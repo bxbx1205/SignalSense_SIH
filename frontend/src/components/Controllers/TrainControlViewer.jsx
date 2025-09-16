@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import RailwayStationSimulation from './RailwayStationSimulation';
+// import RailwayStationSimulation from './RailwayStationSimulation';
 
 // --- ENRICHED DATA with SIGNALS, POINTS, and ROUTES ---
 const initialRailwayData = {
@@ -957,57 +957,13 @@ const TrainControlViewer = () => {
     
     return (
         <div className="bg-gray-900 text-white min-h-screen font-sans">
-            <header className="bg-[#073f7c] p-4 shadow-md border-b-2 border-[#FFA500] flex justify-between items-center">
-                <div className="flex items-center">
-                    <div className="w-12 h-12 bg-[#FFA500] rounded-full flex items-center justify-center mr-4">
-                        <span className="font-bold text-[#073f7c] text-lg">🚄</span>
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-bold text-white">SignalSense AI - Railway Viewer</h1>
-                        <p className="text-sm text-gray-300">🤖 AI-Powered Railway Traffic Management • SIH 2024 🏆</p>
-                    </div>
-                </div>
-                <div className="flex items-center space-x-6">
-                    <div className="bg-gray-800/50 px-4 py-2 rounded-lg">
-                        <div className="text-sm text-gray-400">Current Time</div>
-                        <div className="font-mono font-bold text-white">{currentTime.toLocaleTimeString()}</div>
-                    </div>
-                    <div className="bg-gray-800/50 px-4 py-2 rounded-lg">
-                        <div className="text-sm text-gray-400">Selected Station</div>
-                        <div className="font-bold text-[#FFA500]">{selectedStation?.name || "None"}</div>
-                    </div>
-                    <div className="bg-gray-800/50 px-4 py-2 rounded-lg">
-                        <div className="text-sm text-gray-400">Active Trains</div>
-                        <div className="font-bold text-green-400">{railwayData.active_trains.length}</div>
-                    </div>
-                    <button 
-                        onClick={toggleSimulation}
-                        className={`px-6 py-2 rounded-lg font-bold transition-all ${trainSimulation ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
-                    >
-                        {trainSimulation ? 'Pause Live Data' : 'Start Live Data'}
-                    </button>
-                    <div className="bg-blue-600/20 px-4 py-2 rounded-lg border border-blue-500">
-                        <div className="text-sm text-blue-300">View Only Mode</div>
-                        <div className="text-xs text-blue-400">For operations, use Control Panel</div>
-                    </div>
-                </div>
-            </header>
+            
             
             <main className="container mx-auto p-4">
                 {/* Main 3D Station Simulation - Centered */}
                 <div className="mb-8 flex justify-center">
                     <div className="w-full max-w-7xl">
-                        <RailwayStationSimulation 
-                            stationCode={selectedStation?.code} 
-                            onAlarmGenerate={(alarm) => {
-                                setActiveAlarms(prev => [...prev, {
-                                    ...alarm,
-                                    id: Date.now(),
-                                    timestamp: new Date().toISOString(),
-                                    acknowledged: false
-                                }]);
-                            }}
-                        />
+                      
                     </div>
                 </div>
                 
