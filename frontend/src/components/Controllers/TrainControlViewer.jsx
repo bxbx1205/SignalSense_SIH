@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// import RailwayStationSimulation from './RailwayStationSimulation';
 
 // --- ENRICHED DATA with SIGNALS, POINTS, and ROUTES ---
 const initialRailwayData = {
@@ -13,18 +12,18 @@ const initialRailwayData = {
         { code: "G", name: "Gondia Jn", km: 208.4, platformCount: 2, trackLines: 2 }
     ],
     active_trains: [
-        { id: "12859", name: "Gitanjali Express", position: { section: "BTBR-AJNI", km_from_WR: 70.1 }, speed: 88, status: "RUNNING", scheduled_arrival: "2025-09-15T18:15:00Z", delayed_by_min: 5, direction: "UP" },
-        { id: "12130", name: "Azad Hind Express", position: { section: "NGP-G", km_from_WR: 95.8 }, speed: 105, status: "RUNNING", scheduled_arrival: "2025-09-15T19:30:00Z", delayed_by_min: 0, direction: "DOWN" },
-        { id: "12621", name: "Tamil Nadu Exp", position: { station: "NGP", platform: "P1" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:10:00Z", delayed_by_min: 21, direction: "UP" },
-        { id: "22691", name: "Rajdhani Express", position: { station: "NGP", platform: "P2" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:08:00Z", delayed_by_min: 8, direction: "DOWN" },
-        { id: "12289", name: "CSMT NGP Duronto", position: { section: "AJNI-NGP", km_from_WR: 78.1 }, speed: 25, status: "APPROACHING", scheduled_arrival: "2025-09-15T18:14:00Z", delayed_by_min: 2, direction: "UP" },
-        { id: "12649", name: "Sampark Kranti", position: { station: "NGP", platform: "P6" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:20:00Z", delayed_by_min: 28, direction: "DOWN" },
-        { id: "16032", name: "Andaman Express", position: { station: "WR", platform: "P1" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:30:00Z", delayed_by_min: 0, direction: "UP" },
-        { id: "12860", name: "Gitanjali Express", position: { station: "SEGM", platform: "P1" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:15:00Z", delayed_by_min: 10, direction: "DOWN" },
-        { id: "12724", name: "Telangana Express", position: { station: "BTBR", platform: "P2" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:40:00Z", delayed_by_min: 5, direction: "UP" },
-        { id: "12442", name: "Rajdhani Express", position: { section: "AJNI-NGP", km_from_WR: 77.5 }, speed: 35, status: "APPROACHING", scheduled_arrival: "2025-09-15T18:25:00Z", delayed_by_min: 0, direction: "DOWN" },
-        { id: "12619", name: "Matsyagandha Exp", position: { station: "AJNI", platform: "P1" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:12:00Z", delayed_by_min: 15, direction: "UP" },
-        { id: "18030", name: "Shalimar Express", position: { station: "G", platform: "P2" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-15T18:05:00Z", delayed_by_min: 20, direction: "DOWN" },
+        { id: "12859", name: "Gitanjali Express", position: { section: "BTBR-AJNI", km_from_WR: 70.1 }, speed: 88, status: "RUNNING", scheduled_arrival: "2025-09-16T18:15:00Z", delayed_by_min: 5, direction: "UP" },
+        { id: "12130", name: "Azad Hind Express", position: { section: "NGP-G", km_from_WR: 95.8 }, speed: 105, status: "RUNNING", scheduled_arrival: "2025-09-16T19:30:00Z", delayed_by_min: 0, direction: "DOWN" },
+        { id: "12621", name: "Tamil Nadu Exp", position: { station: "NGP", platform: "P1" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-16T18:10:00Z", delayed_by_min: 21, direction: "UP" },
+        { id: "22691", name: "Rajdhani Express", position: { station: "NGP", platform: "P2" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-16T18:08:00Z", delayed_by_min: 8, direction: "DOWN" },
+        { id: "12289", name: "CSMT NGP Duronto", position: { section: "AJNI-NGP", km_from_WR: 78.1 }, speed: 25, status: "APPROACHING", scheduled_arrival: "2025-09-16T18:14:00Z", delayed_by_min: 2, direction: "UP" },
+        { id: "12649", name: "Sampark Kranti", position: { station: "NGP", platform: "P6" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-16T18:20:00Z", delayed_by_min: 28, direction: "DOWN" },
+        { id: "16032", name: "Andaman Express", position: { station: "WR", platform: "P1" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-16T18:30:00Z", delayed_by_min: 0, direction: "UP" },
+        { id: "12860", name: "Gitanjali Express", position: { station: "SEGM", platform: "P1" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-16T18:15:00Z", delayed_by_min: 10, direction: "DOWN" },
+        { id: "12724", name: "Telangana Express", position: { station: "BTBR", platform: "P2" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-16T18:40:00Z", delayed_by_min: 5, direction: "UP" },
+        { id: "12442", name: "Rajdhani Express", position: { section: "AJNI-NGP", km_from_WR: 77.5 }, speed: 35, status: "APPROACHING", scheduled_arrival: "2025-09-16T18:25:00Z", delayed_by_min: 0, direction: "DOWN" },
+        { id: "12619", name: "Matsyagandha Exp", position: { station: "AJNI", platform: "P1" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-16T18:12:00Z", delayed_by_min: 15, direction: "UP" },
+        { id: "18030", name: "Shalimar Express", position: { station: "G", platform: "P2" }, speed: 0, status: "STOPPED", scheduled_departure: "2025-09-16T18:05:00Z", delayed_by_min: 20, direction: "DOWN" },
     ],
     points: [
         // NGP Points
@@ -221,17 +220,17 @@ const TwoTrackStationLayout = ({ stationName, stationCode, activeTrains, points,
     const stationPoints = points.filter(p => p.stationCode === stationCode || p.id.startsWith(stationCode));
 
     return (
-        <div className="relative bg-[#0A1A30] w-full h-[580px] p-2 overflow-hidden rounded-lg border-2 border-[#073f7c]">
+        <div className="relative bg-slate-900/40 backdrop-blur-md w-full h-[580px] p-2 overflow-hidden rounded-lg border-2 border-blue-400/30">
             <div className="absolute top-0 left-0 w-full flex justify-center">
-                <div className="bg-[#073f7c] text-center py-2 px-4 rounded-b-lg">
+                <div className="bg-slate-800/40 backdrop-blur-md text-center py-2 px-4 rounded-b-lg border border-blue-400/30">
                     <h2 className="text-lg font-bold text-[#FFA500]">{stationName} ({stationCode}) - 2 TRACK STATION</h2>
                 </div>
             </div>
             
             <div className="flex justify-between mt-12 mx-6 mb-2">
-                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">INCOMING</div>
-                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">CENTRAL TRAIN CONTROL</div>
-                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">OUTGOING</div>
+                <div className="bg-slate-800/40 backdrop-blur-md px-4 py-1 rounded text-white font-bold border border-blue-400/30">INCOMING</div>
+                <div className="bg-slate-800/40 backdrop-blur-md px-4 py-1 rounded text-white font-bold border border-blue-400/30">CENTRAL TRAIN CONTROL</div>
+                <div className="bg-slate-800/40 backdrop-blur-md px-4 py-1 rounded text-white font-bold border border-blue-400/30">OUTGOING</div>
             </div>
             
             <svg width="100%" height="90%" viewBox="0 0 1200 400">
@@ -306,7 +305,7 @@ const TwoTrackStationLayout = ({ stationName, stationCode, activeTrains, points,
             </svg>
             
             {/* Track Occupancy Info */}
-            <div className="absolute top-2 right-2 bg-gray-800 px-3 py-2 rounded shadow text-xs">
+            <div className="absolute top-2 right-2 bg-slate-900/50 backdrop-blur-md px-3 py-2 rounded shadow text-xs border border-blue-400/30">
                 <div className="font-bold text-yellow-400 mb-1">Track Occupancy</div>
                 <div className="space-y-1">
                     <div className="flex justify-between items-center">
@@ -325,7 +324,7 @@ const TwoTrackStationLayout = ({ stationName, stationCode, activeTrains, points,
             </div>
             
             {/* Station info panel */}
-            <div className="absolute bottom-2 left-2 bg-gray-800 px-3 py-2 rounded shadow text-xs">
+            <div className="absolute bottom-2 left-2 bg-slate-900/50 backdrop-blur-md px-3 py-2 rounded shadow text-xs border border-blue-400/30">
                 <div className="font-bold text-yellow-400 mb-1">Station Info</div>
                 <div className="text-gray-300">
                     <div>Code: {stationCode}</div>
@@ -354,17 +353,17 @@ const AjniStationLayout = ({ activeTrains, points, signals, onPointToggle, onSig
     const ajniPoints = points.filter(p => p.stationCode === 'AJNI' || p.id.startsWith('AJNI'));
 
     return (
-        <div className="relative bg-[#0A1A30] w-full h-[580px] p-2 overflow-hidden rounded-lg border-2 border-[#073f7c]">
+        <div className="relative bg-slate-900/40 backdrop-blur-md w-full h-[580px] p-2 overflow-hidden rounded-lg border-2 border-blue-400/30">
             <div className="absolute top-0 left-0 w-full flex justify-center">
-                <div className="bg-[#073f7c] text-center py-2 px-4 rounded-b-lg">
+                <div className="bg-slate-800/40 backdrop-blur-md text-center py-2 px-4 rounded-b-lg border border-blue-400/30">
                     <h2 className="text-lg font-bold text-[#FFA500]">AJNI JUNCTION - 4 TRACK STATION</h2>
                 </div>
             </div>
             
             <div className="flex justify-between mt-12 mx-6 mb-2">
-                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">FROM BTBR</div>
-                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">AJNI CONTROL ROOM</div>
-                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">TO NGP</div>
+                <div className="bg-slate-800/40 backdrop-blur-md px-4 py-1 rounded text-white font-bold border border-blue-400/30">FROM BTBR</div>
+                <div className="bg-slate-800/40 backdrop-blur-md px-4 py-1 rounded text-white font-bold border border-blue-400/30">AJNI CONTROL ROOM</div>
+                <div className="bg-slate-800/40 backdrop-blur-md px-4 py-1 rounded text-white font-bold border border-blue-400/30">TO NGP</div>
             </div>
             
             <svg width="100%" height="90%" viewBox="0 0 1200 450">
@@ -453,7 +452,7 @@ const AjniStationLayout = ({ activeTrains, points, signals, onPointToggle, onSig
             </svg>
             
             {/* Track Occupancy Info */}
-            <div className="absolute top-2 right-2 bg-gray-800 px-3 py-2 rounded shadow text-xs">
+            <div className="absolute top-2 right-2 bg-slate-900/50 backdrop-blur-md px-3 py-2 rounded shadow text-xs border border-blue-400/30">
                 <div className="font-bold text-yellow-400 mb-1">Track Occupancy</div>
                 <div className="space-y-1">
                     {[1,2,3,4].map(track => (
@@ -468,7 +467,7 @@ const AjniStationLayout = ({ activeTrains, points, signals, onPointToggle, onSig
             </div>
             
             {/* Station info panel */}
-            <div className="absolute bottom-2 left-2 bg-gray-800 px-3 py-2 rounded shadow text-xs">
+            <div className="absolute bottom-2 left-2 bg-slate-900/50 backdrop-blur-md px-3 py-2 rounded shadow text-xs border border-blue-400/30">
                 <div className="font-bold text-yellow-400 mb-1">Station Info</div>
                 <div className="text-gray-300">
                     <div>Code: AJNI</div>
@@ -499,9 +498,9 @@ const NagpurYardLayout = ({ activeTrains, points, signals, onPointToggle, onSign
     const ngpPoints = points.filter(p => p.stationCode === 'NGP' || (!p.stationCode && !p.id.includes('101')));
     
     return (
-        <div className="relative bg-[#0A1A30] w-full h-[580px] p-2 overflow-hidden rounded-lg border-2 border-[#073f7c]">
+        <div className="relative bg-slate-900/40 backdrop-blur-md w-full h-[580px] p-2 overflow-hidden rounded-lg border-2 border-blue-400/30">
             {/* Track Occupancy Legend */}
-            <div className="absolute top-2 right-2 bg-gray-800 px-3 py-2 rounded shadow text-xs">
+            <div className="absolute top-2 right-2 bg-slate-900/50 backdrop-blur-md px-3 py-2 rounded shadow text-xs border border-blue-400/30">
                 <div className="font-bold text-yellow-400 mb-1">Track Occupancy</div>
                 <div className="grid grid-cols-2 gap-1">
                     {Object.entries(trackOccupancy).map(([section, trainId]) => (
@@ -513,15 +512,15 @@ const NagpurYardLayout = ({ activeTrains, points, signals, onPointToggle, onSign
                 </div>
             </div>
             <div className="absolute top-0 left-0 w-full flex justify-center">
-                <div className="bg-[#073f7c] text-center py-2 px-4 rounded-b-lg">
+                <div className="bg-slate-800/40 backdrop-blur-md text-center py-2 px-4 rounded-b-lg border border-blue-400/30">
                     <h2 className="text-lg font-bold text-[#FFA500]">NAGPUR (NGP) YARD CONTROL</h2>
                 </div>
             </div>
             
             <div className="flex justify-between mt-12 mx-6 mb-2">
-                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">TO AJNI</div>
-                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">CENTRAL TRAIN CONTROL</div>
-                <div className="bg-[#073f7c] px-4 py-1 rounded text-white font-bold">TO GONDIA</div>
+                <div className="bg-slate-800/40 backdrop-blur-md px-4 py-1 rounded text-white font-bold border border-blue-400/30">TO AJNI</div>
+                <div className="bg-slate-800/40 backdrop-blur-md px-4 py-1 rounded text-white font-bold border border-blue-400/30">CENTRAL TRAIN CONTROL</div>
+                <div className="bg-slate-800/40 backdrop-blur-md px-4 py-1 rounded text-white font-bold border border-blue-400/30">TO GONDIA</div>
             </div>
             
             <svg width="100%" height="90%" viewBox="0 0 1400 500">
@@ -640,7 +639,7 @@ const NagpurYardLayout = ({ activeTrains, points, signals, onPointToggle, onSign
                 })}
                 
                 {/* Control room elements */}
-                <rect x="500" y="40" width="400" height="60" rx="10" fill="#073f7c" opacity="0.7" stroke="#9EADC8" strokeWidth="2" />
+                <rect x="500" y="40" width="400" height="60" rx="10" fill="rgba(71, 85, 105, 0.3)" opacity="0.7" stroke="#60A5FA" strokeWidth="2" />
                 <text x="700" y="75" fill="#FFA500" fontSize="16" textAnchor="middle" fontWeight="bold">DISPATCH CONTROL PANEL</text>
                 
                 {/* Legend */}
@@ -663,11 +662,11 @@ const NagpurYardLayout = ({ activeTrains, points, signals, onPointToggle, onSign
             </svg>
             
             {/* Alarm Log */}
-            <div className="absolute bottom-2 left-2 bg-gray-800 px-3 py-2 rounded shadow text-xs max-h-32 overflow-y-auto w-96">
+            <div className="absolute bottom-2 left-2 bg-slate-900/50 backdrop-blur-md px-3 py-2 rounded shadow text-xs max-h-32 overflow-y-auto w-96 border border-blue-400/30">
                 <div className="font-bold text-yellow-400 mb-1">System Log</div>
                 <div className="text-gray-400">All systems operational</div>
             </div>
-            <div className="absolute bottom-2 right-2 bg-[#073f7c] px-2 py-1 rounded">
+            <div className="absolute bottom-2 right-2 bg-slate-800/40 backdrop-blur-md px-2 py-1 rounded border border-blue-400/30">
                 <div className="text-xs text-[#FFA500]">SYSTEM STATUS: OPERATIONAL</div>
             </div>
         </div>
@@ -679,11 +678,48 @@ const TrainControlViewer = () => {
     const [railwayData, setRailwayData] = useState(initialRailwayData);
     const [trackOccupancy, setTrackOccupancy] = useState({});
     const [selectedStation, setSelectedStation] = useState(railwayData.stations.find(s => s.code === 'NGP'));
-    const [currentTime, setCurrentTime] = useState(new Date("2025-09-15T18:13:12+05:30"));
+    const [currentTime, setCurrentTime] = useState(new Date("2025-09-16T15:33:52+05:30"));
     const [activeAlarms, setActiveAlarms] = useState([]);
     const [lastAction, setLastAction] = useState(null);
     const [trainSimulation, setTrainSimulation] = useState(false);
     const simulationRef = useRef(null);
+    const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
+
+    // Add this useEffect for synchronizing with TrainControlOperator changes
+    useEffect(() => {
+        // Expose data to window object for cross-component communication
+        window.__railwayData = railwayData;
+        window.__selectedStation = selectedStation;
+        window.__currentTime = currentTime;
+        
+        // Setup state setter function that will be called by the operator component
+        window.__setRailwayData = (newDataOrUpdater) => {
+            if (typeof newDataOrUpdater === 'function') {
+                setRailwayData(prevData => {
+                    const newData = newDataOrUpdater(prevData);
+                    setLastUpdateTime(new Date());
+                    return newData;
+                });
+            } else {
+                setRailwayData(newDataOrUpdater);
+                setLastUpdateTime(new Date());
+            }
+        };
+        
+        // Listen for update events from operator component
+        const handleDataUpdate = () => {
+            // This will be triggered when the Operator component updates data
+            // and dispatches the 'railwayDataUpdated' event
+            console.log("railwayDataUpdated event received in viewer");
+            setLastUpdateTime(new Date());
+        };
+        
+        window.addEventListener('railwayDataUpdated', handleDataUpdate);
+        
+        return () => {
+            window.removeEventListener('railwayDataUpdated', handleDataUpdate);
+        };
+    }, [railwayData, selectedStation, currentTime]);
 
     useEffect(() => {
         // Real-time clock
@@ -800,15 +836,22 @@ const TrainControlViewer = () => {
         setLastAction(`Selected station: ${station.name}`);
     };
 
-    const handlePointToggle = (pointId) => {
+        const handlePointToggle = (pointId) => {
         setRailwayData(prevData => {
             const newPoints = prevData.points.map(point => 
                 point.id === pointId 
                     ? { ...point, position: point.position === "NORMAL" ? "REVERSE" : "NORMAL" } 
                     : point
             );
-            return { ...prevData, points: newPoints };
+            
+            const updatedData = { ...prevData, points: newPoints };
+            
+            // Dispatch the event to notify other components
+            window.dispatchEvent(new Event('railwayDataUpdated'));
+            
+            return updatedData;
         });
+        
         setLastAction(`Point ${pointId} position toggled`);
     };
 
@@ -826,8 +869,15 @@ const TrainControlViewer = () => {
                 }
                 return signal;
             });
-            return { ...prevData, signals: newSignals };
+            
+            const updatedData = { ...prevData, signals: newSignals };
+            
+            // Dispatch the event to notify other components
+            window.dispatchEvent(new Event('railwayDataUpdated'));
+            
+            return updatedData;
         });
+        
         setLastAction(`Signal ${signalId} state changed`);
     };
 
@@ -836,10 +886,10 @@ const TrainControlViewer = () => {
         setLastAction(trainSimulation ? 'Live simulation paused' : 'Live simulation started');
     };
 
-        const renderStationLayout = () => {
+    const renderStationLayout = () => {
         if (!selectedStation) {
             return (
-                <div className="flex items-center justify-center h-64 bg-[#0A1A30] rounded-lg border border-[#073f7c]">
+                <div className="flex items-center justify-center h-64 bg-slate-900/40 backdrop-blur-md rounded-lg border border-blue-400/30">
                     <p className="text-gray-400">Please select a station to view its layout</p>
                 </div>
             );
@@ -942,41 +992,58 @@ const TrainControlViewer = () => {
                 );
             default:
                 return (
-                    <div className="flex items-center justify-center h-64 bg-[#0A1A30] rounded-lg border border-[#073f7c]">
+                    <div className="flex items-center justify-center h-64 bg-slate-900/40 backdrop-blur-md rounded-lg border border-blue-400/30">
                         <p className="text-gray-400">Please select a station to view its layout</p>
                     </div>
                 );
         }
     };
-
-    // Expose railway data for the operator section
-    window.__railwayData = railwayData;
-    window.__setRailwayData = setRailwayData;
-    window.__selectedStation = selectedStation;
-    window.__currentTime = currentTime;
     
     return (
-        <div className="bg-gray-900 text-white min-h-screen font-sans">
-            
-            
-            <main className="container mx-auto p-4">
+        <div className="text-white min-h-screen font-sans">
+            <main className="container mx-auto p-4 pt-20"> {/* Added padding top for navbar */}
                 {/* Main 3D Station Simulation - Centered */}
                 <div className="mb-8 flex justify-center">
                     <div className="w-full max-w-7xl">
-                      
+                        {/* Simulation control panel */}
+                        <div className="bg-slate-900/40 backdrop-blur-md p-4 rounded-lg border border-blue-400/30 mb-4">
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-lg font-semibold text-[#FFA500] flex items-center">
+                                    🚄 Live Railway Simulation
+                                    <span className="ml-2 text-xs bg-blue-500/30 px-2 py-1 rounded-full border border-blue-400/50">
+                                        SignalSense AI
+                                    </span>
+                                    <span className="ml-2 text-xs bg-green-500/30 px-2 py-1 rounded-full">
+                                        Last updated: {lastUpdateTime.toLocaleTimeString()}
+                                    </span>
+                                </h3>
+                                <div className="flex items-center gap-4">
+                                    <button
+                                        onClick={toggleSimulation}
+                                        className={`px-4 py-2 rounded-lg font-medium transition-all border ${
+                                            trainSimulation 
+                                                ? 'bg-red-600/80 hover:bg-red-600 text-white border-red-400/50' 
+                                                : 'bg-green-600/80 hover:bg-green-600 text-white border-green-400/50'
+                                        }`}
+                                    >
+                                        {trainSimulation ? '⏸️ Pause Simulation' : '▶️ Start Simulation'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 {/* Centered Main Content Area */}
                 <div className="flex flex-col gap-6 max-w-7xl mx-auto">
                     {/* Station Selection Row */}
-                    <div className="bg-[#0A1A30] p-4 rounded-lg shadow-lg border border-[#073f7c]">
-                        <h2 className="text-lg font-semibold mb-4 text-[#FFA500] border-b border-gray-700 pb-2 flex items-center">
+                    <div className="bg-slate-900/40 backdrop-blur-md p-4 rounded-lg shadow-lg border border-blue-400/30">
+                        <h2 className="text-lg font-semibold mb-4 text-[#FFA500] border-b border-blue-400/30 pb-2 flex items-center">
                             🚄 Route Stations: Wardha ↔ Gondia 
-                            <span className="ml-2 text-xs bg-blue-500/20 px-2 py-1 rounded-full">
-                                View Only Mode
+                            <span className="ml-2 text-xs bg-blue-500/30 px-2 py-1 rounded-full border border-blue-400/50">
+                                Interactive Mode
                             </span>
-                            <span className="text-xs text-gray-400 ml-2">
+                            <span className="text-xs text-gray-300 ml-2">
                                 {railwayData.stations[0].km} - {railwayData.stations[railwayData.stations.length-1].km} km, 
                                 Distance: {(railwayData.stations[railwayData.stations.length-1].km - railwayData.stations[0].km).toFixed(1)} km
                             </span>
@@ -988,10 +1055,10 @@ const TrainControlViewer = () => {
                                     whileHover={{ y: -2, scale: 1.05 }} 
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => handleStationClick(station)} 
-                                    className={`p-3 text-center rounded-lg cursor-pointer transition-all border-2 ${
+                                    className={`p-3 text-center rounded-lg cursor-pointer transition-all border-2 backdrop-blur-md ${
                                         selectedStation?.code === station.code 
-                                            ? 'bg-blue-800 border-blue-400 shadow-lg shadow-blue-500/25' 
-                                            : 'bg-gray-700 border-gray-600 hover:border-gray-500 hover:bg-gray-600'
+                                            ? 'bg-blue-800/40 border-blue-400 shadow-lg shadow-blue-500/25' 
+                                            : 'bg-slate-800/30 border-blue-400/20 hover:border-blue-400/40 hover:bg-slate-800/40'
                                     }`}
                                 >
                                     <div className="font-bold text-lg">{station.code}</div>
@@ -1040,11 +1107,11 @@ const TrainControlViewer = () => {
                     </AnimatePresence>
                     
                     {/* Live Train Traffic Table */}
-                    <div className="bg-[#0A1A30] p-4 rounded-lg shadow-lg border border-[#073f7c]">
-                        <div className="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
+                    <div className="bg-slate-900/40 backdrop-blur-md p-4 rounded-lg shadow-lg border border-blue-400/30">
+                        <div className="flex justify-between items-center mb-4 border-b border-blue-400/30 pb-2">
                             <h2 className="text-lg font-semibold text-[#FFA500] flex items-center">
                                 🚂 Live Train Traffic
-                                <span className="ml-2 text-xs bg-green-500/20 px-2 py-1 rounded-full">
+                                <span className="ml-2 text-xs bg-green-500/30 px-2 py-1 rounded-full border border-green-400/50">
                                     Real-time Data
                                 </span>
                             </h2>
@@ -1067,7 +1134,7 @@ const TrainControlViewer = () => {
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
-                                <thead className="bg-gray-800">
+                                <thead className="bg-slate-800/40 backdrop-blur-md">
                                     <tr>
                                         <th className="py-3 px-4 text-left font-semibold">Train Details</th>
                                         <th className="py-3 px-4 text-left font-semibold">Current Location</th>
@@ -1077,11 +1144,11 @@ const TrainControlViewer = () => {
                                         <th className="py-3 px-4 text-center font-semibold">Priority</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-700">
+                                <tbody className="divide-y divide-blue-400/20">
                                     {railwayData.active_trains.map(train => (
                                         <motion.tr 
                                             key={train.id} 
-                                            className="hover:bg-gray-800/50 transition-colors"
+                                            className="hover:bg-slate-800/30 transition-colors backdrop-blur-md"
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             exit={{ opacity: 0 }}
@@ -1143,7 +1210,7 @@ const TrainControlViewer = () => {
                                                     }`}>
                                                         {train.id.startsWith('22') || train.id.startsWith('12') ? 'HIGH' : 'NORMAL'}
                                                     </span>
-                                                    <button className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors">
+                                                    <button className="px-2 py-1 bg-slate-800/40 hover:bg-slate-700/40 rounded text-xs transition-colors border border-blue-400/20">
                                                         View Details
                                                     </button>
                                                 </div>
@@ -1156,30 +1223,30 @@ const TrainControlViewer = () => {
                     </div>
 
                     {/* System Analytics Dashboard */}
-                    <div className="bg-[#0A1A30] p-4 rounded-lg shadow-lg border border-[#073f7c]">
-                        <h2 className="text-lg font-semibold mb-4 text-[#FFA500] border-b border-gray-700 pb-2 flex items-center">
+                    <div className="bg-slate-900/40 backdrop-blur-md p-4 rounded-lg shadow-lg border border-blue-400/30">
+                        <h2 className="text-lg font-semibold mb-4 text-[#FFA500] border-b border-blue-400/30 pb-2 flex items-center">
                             📊 System Analytics Dashboard
-                            <span className="ml-2 text-xs bg-purple-500/20 px-2 py-1 rounded-full">
+                            <span className="ml-2 text-xs bg-purple-500/30 px-2 py-1 rounded-full border border-purple-400/50">
                                 AI Insights
                             </span>
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 p-4 rounded-lg border border-blue-500/30">
+                            <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 p-4 rounded-lg border border-blue-500/30 backdrop-blur-md">
                                 <div className="text-sm text-blue-300 mb-1">Network Efficiency</div>
                                 <div className="text-2xl font-bold text-blue-400">94.2%</div>
                                 <div className="text-xs text-blue-300">+2.1% from yesterday</div>
                             </div>
-                            <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 p-4 rounded-lg border border-green-500/30">
+                            <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 p-4 rounded-lg border border-green-500/30 backdrop-blur-md">
                                 <div className="text-sm text-green-300 mb-1">On-Time Performance</div>
                                 <div className="text-2xl font-bold text-green-400">87.5%</div>
                                 <div className="text-xs text-green-300">+0.8% from yesterday</div>
                             </div>
-                            <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-800/20 p-4 rounded-lg border border-yellow-500/30">
+                            <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-800/20 p-4 rounded-lg border border-yellow-500/30 backdrop-blur-md">
                                 <div className="text-sm text-yellow-300 mb-1">Average Delay</div>
                                 <div className="text-2xl font-bold text-yellow-400">8.2m</div>
                                 <div className="text-xs text-yellow-300">-1.3m from yesterday</div>
                             </div>
-                            <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 p-4 rounded-lg border border-purple-500/30">
+                            <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 p-4 rounded-lg border border-purple-500/30 backdrop-blur-md">
                                 <div className="text-sm text-purple-300 mb-1">AI Predictions</div>
                                 <div className="text-2xl font-bold text-purple-400">96.8%</div>
                                 <div className="text-xs text-purple-300">Accuracy rate</div>
@@ -1188,6 +1255,24 @@ const TrainControlViewer = () => {
                     </div>
                 </div>
             </main>
+
+            {/* Footer with updated theme */}
+            <footer className="mt-12 bg-slate-900/40 backdrop-blur-md p-6 border-t border-blue-400/30">
+                <div className="max-w-7xl mx-auto text-center">
+                    <div className="text-white/90">
+                        🇮🇳 <strong>SignalSense AI Railway Management System</strong> - Empowering Railway Operations with Intelligent Technology 🇮🇳
+                    </div>
+                    <div className="text-xs text-white/70 mt-2">
+                        © 2024 Team Excellence • Smart India Hackathon 2024 • 
+                        <a href="https://github.com/bxbx1205/SignalSense_SIH" className="text-cyan-400 hover:text-cyan-300 ml-1">
+                            GitHub: bxbx1205/SignalSense_SIH
+                        </a> • All Rights Reserved
+                    </div>
+                    <div className="text-xs text-cyan-400 mt-1">
+                        Developed by Bharat27-d • Current Session: {currentTime.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 };
